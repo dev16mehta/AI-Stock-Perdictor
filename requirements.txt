@@ -1,0 +1,12 @@
+streamlit
+yfinance
+newsapi-python
+vaderSentiment
+langchain
+langchain-groq
+python-dotenv
+pandas
+numpy
+scikit-learn
+plotly
+
