@@ -45,7 +45,7 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
         template = """
         You are an expert financial analyst. Analyze the following news articles for {ticker}.
         Provide a concise, data-driven summary highlighting key market-moving information.
-        Present a brief "Bull Case" (reasons to be optimistic) and "Bear Case" (reasons to be cautious) based on the news sentiment and content.
+        Present a brief "Reasons to be Optimistic" (reasons to be optimistic) and "Reasons to be Cautious" (reasons to be cautious) based on the news sentiment and content.
         
         News Articles: "{news_text}"
 
