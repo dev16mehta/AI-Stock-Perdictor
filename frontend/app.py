@@ -79,8 +79,12 @@ def display_stock_details(container, ticker_data):
                 st.divider()
 
 # --- Main App ---
-st.title("AI Stock Analyser")
+st.markdown("""
+    # AI Stock Analyser
+    **Made by Dev Mehta** | *Powered by yFinance, NewsAPI, VADER, and Groq*
+""")
 st.caption("Enter one or two stocks (comma-separated) for a side-by-side comparison.")
+st.divider()
 
 # --- Sidebar ---
 with st.sidebar:
