@@ -1,6 +1,7 @@
 # Environment
 .venv/
 .env
+firebase_service_account.json
 
 # Python cache
 __pycache__/

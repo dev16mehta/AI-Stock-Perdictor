@@ -168,4 +168,4 @@ if analyze_button:
                     display_stock_details(col1, all_data[0])
                     display_stock_details(col2, all_data[1])
 else:
-    st.info("Enter stock and click 'Analyse Stocks' to begin.")
+    st.info("Enter stock and click 'Analyse Stocks' to begin.") 
