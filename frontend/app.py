@@ -13,7 +13,7 @@ from backend.ai_analyzer import analyze_sentiment, get_ai_summary, get_ai_compar
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="AI Stock Analyser",
+    page_title="QuantView AI",
     page_icon="📈",
     layout="wide"
 )
@@ -80,7 +80,7 @@ def display_stock_details(container, ticker_data):
 
 # --- Main App ---
 st.markdown("""
-    # AI Stock Analyser
+    # QuantView AI
     **Made by Dev Mehta** | *Powered by yFinance, NewsAPI, VADER, and Groq*
 """)
 st.caption("Enter one or two stocks (comma-separated) for a side-by-side comparison.")
