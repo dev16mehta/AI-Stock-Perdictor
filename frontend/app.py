@@ -34,47 +34,49 @@ def display_sentiment_bar(container, score):
         </div>
     """, unsafe_allow_html=True)
 
-def display_stock_data(container, ticker_data):
+def display_stock_details(container, ticker_data):
     """
-    Displays the data for a single stock in a given container (either st or a column).
-    All st calls are replaced with container calls to direct output correctly.
+    Displays the detailed data for a single stock in a given container (either st or a column).
+    This function now uses sub-tabs for better organization.
     """
     container.header(f"{ticker_data['info'].info.get('longName', ticker_data['ticker'])}")
     
-    # Check if historical data exists before trying to display it
-    if ticker_data['hist'].empty:
-        container.error("No historical price data found for the selected date range. Please select a valid range (e.g., in the past).")
-    else:
-        # Key Metrics
-        col1, col2 = container.columns(2)
-        current_price = ticker_data['hist']['Close'].iloc[-1]
-        col1.metric("Last Close", f"${current_price:,.2f}")
-        market_cap = ticker_data['info'].info.get('marketCap', 0)
-        col2.metric("Market Cap", f"${market_cap / 1e9:,.2f}B")
+    # Create sub-tabs within the container
+    sub_tabs = container.tabs(["📊 Key Metrics", "💬 News Sentiment", "💰 Financials", "📰 Recent News"])
 
-    # Sentiment
-    container.subheader("News Sentiment")
-    container.metric("Sentiment Score", f"{ticker_data['sentiment']:.2f}", help="Score > 0.05 is Positive, < -0.05 is Negative")
-    display_sentiment_bar(container, ticker_data['sentiment'])
-    
-    # Financials
-    with container.expander("View Financials"):
-        st.write("**Income Statement**") # st.write is fine here as it's inside an expander
+    # --- Key Metrics Tab ---
+    with sub_tabs[0]:
+        if ticker_data['hist'].empty:
+            st.warning("No historical price data for the selected range.")
+        else:
+            col1, col2 = st.columns(2)
+            current_price = ticker_data['hist']['Close'].iloc[-1]
+            col1.metric("Last Close", f"${current_price:,.2f}")
+            market_cap = ticker_data['info'].info.get('marketCap', 0)
+            col2.metric("Market Cap", f"${market_cap / 1e9:,.2f}B")
+
+    # --- News Sentiment Tab ---
+    with sub_tabs[1]:
+        st.metric("Sentiment Score", f"{ticker_data['sentiment']:.2f}", help="Score > 0.05 is Positive, < -0.05 is Negative")
+        display_sentiment_bar(st, ticker_data['sentiment']) # Use st here as it's inside a tab
+
+    # --- Financials Tab ---
+    with sub_tabs[2]:
+        st.write("**Income Statement**")
         st.dataframe(ticker_data['info'].income_stmt.head())
         st.write("**Balance Sheet**")
         st.dataframe(ticker_data['info'].balance_sheet.head())
     
-    # News
-    with container.expander("View Recent News"):
+    # --- Recent News Tab ---
+    with sub_tabs[3]:
         if not ticker_data['news']:
             st.write("No recent news found.")
-        for article in ticker_data['news'][:5]: # Show top 5
+        for article in ticker_data['news'][:5]:
             if article and article.get('title'):
                 st.write(f"**{article['title']}**")
                 st.write(f"_{article.get('source', {}).get('name', 'Unknown Source')} - {pd.to_datetime(article.get('publishedAt')).strftime('%Y-%m-%d')}_")
                 st.markdown(f"[Read]({article.get('url')})", unsafe_allow_html=True)
-                st.markdown("---")
-
+                st.divider()
 
 # --- Main App ---
 st.title("AI Stock Analyser")
@@ -123,21 +125,27 @@ if analyze_button:
                     else:
                         st.error(f"Could not retrieve data for {ticker}. It may be an invalid ticker symbol.")
             
-            plot_data = [data for data in all_data if not data['hist'].empty]
+            if not all_data:
+                st.stop()
 
-            if plot_data:
-                st.header("Performance Comparison")
-                fig = go.Figure()
-                for data in plot_data:
-                    normalized_hist = normalize_prices(data['hist'])
-                    fig.add_trace(go.Scatter(x=normalized_hist.index, y=normalized_hist, mode='lines', name=data['ticker']))
-                fig.update_layout(title="Normalized Price Performance (starting at 100)", yaxis_title="Normalized Price")
-                st.plotly_chart(fig, use_container_width=True)
-            elif all_data:
-                 st.info("No historical data to plot for the selected range.")
+            # --- Create Main Tabs ---
+            main_tabs = st.tabs(["Performance", "AI Insights", "Detailed Analysis"])
 
-            if all_data:
-                st.header("AI Insights")
+            # --- Performance Tab ---
+            with main_tabs[0]:
+                plot_data = [data for data in all_data if not data['hist'].empty]
+                if plot_data:
+                    fig = go.Figure()
+                    for data in plot_data:
+                        normalized_hist = normalize_prices(data['hist'])
+                        fig.add_trace(go.Scatter(x=normalized_hist.index, y=normalized_hist, mode='lines', name=data['ticker']))
+                    fig.update_layout(title="Normalized Price Performance (starting at 100)", yaxis_title="Normalized Price")
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("No historical data to plot for the selected range.")
+
+            # --- AI Insights Tab ---
+            with main_tabs[1]:
                 if len(all_data) == 2:
                     with st.spinner("Generating AI comparison..."):
                         ai_comp = get_ai_comparison(all_data[0], all_data[1], investor_level)
@@ -146,15 +154,14 @@ if analyze_button:
                     with st.spinner("Generating AI summary..."):
                         ai_sum = get_ai_summary(all_data[0]['news'], all_data[0]['ticker'], investor_level)
                     st.markdown(ai_sum)
-                st.markdown("---")
 
-            if len(all_data) == 1:
-                # Call the function on the main 'st' object
-                display_stock_data(st, all_data[0])
-            elif len(all_data) == 2:
-                # Call the function on each column object
-                col1, col2 = st.columns(2)
-                display_stock_data(col1, all_data[0])
-                display_stock_data(col2, all_data[1])
+            # --- Detailed Analysis Tab ---
+            with main_tabs[2]:
+                if len(all_data) == 1:
+                    display_stock_details(st, all_data[0])
+                elif len(all_data) == 2:
+                    col1, col2 = st.columns(2)
+                    display_stock_details(col1, all_data[0])
+                    display_stock_details(col2, all_data[1])
 else:
     st.info("Enter stock and click 'Analyse Stocks' to begin.")
