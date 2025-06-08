@@ -151,13 +151,13 @@ def page_2fa():
                 st.session_state.logged_in = True
                 st.success("Login Successful!")
                 time.sleep(1) # Pause for user to see the message
-                st.switch_page("pages/1_📈_Stock_Analyser.py")
+                st.switch_page("pages/stockAnalyser.py")
             else:
                 st.error("Invalid code. Please try again.")
 
 # --- Main Logic ---
 if st.session_state.logged_in:
-    st.switch_page("pages/1_📈_Stock_Analyser.py")
+    st.switch_page("pages/stockAnalyser.py")
 else:
     if st.session_state.page == 'login':
         page_login()
