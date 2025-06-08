@@ -99,6 +99,11 @@ A new tab should automatically open in your web browser at http://localhost:8501
 - Analyse: Click the "Analyse Stocks" button.
 - Explore: View the normalized performance chart, read the AI insights, and explore the side-by-side comparison of metrics, news, and financials.
 
+Pro Tip for International Stocks: For stocks outside the US, you may need to add a market suffix. For example:
+Barclays (London): BARC.L
+Volkswagen (Germany): VOW3.DE
+Reliance (India): RELIANCE.NS
+
 ## Future Developments
 - The next major feature planned is the integration of machine learning models for price prediction:
     Time-Series Forecasting: Implement models like ARIMA or Prophet to generate short-term price predictions and visualize them on the chart.
