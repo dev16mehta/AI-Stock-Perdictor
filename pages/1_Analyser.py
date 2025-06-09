@@ -5,6 +5,11 @@ from datetime import date, timedelta
 import sys
 import os
 
+# --- Authentication Guard ---
+if not st.session_state.get("logged_in", False):
+    st.error("You need to be logged in to access this page.")
+    st.stop()
+
 # This tells Python to look in the parent directory for modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
