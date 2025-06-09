@@ -11,9 +11,10 @@ if not st.session_state.get("logged_in", False):
     st.stop()
 
 # This tells Python to look in the parent directory for modules
+# Use '..' to go up one level from the 'pages' directory to the root.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from backend.data_handler import get_stock_data, get_financial_news, get_watchlist, add_to_watchlist, remove_from_watchlist # <-- Updated imports
+from backend.data_handler import get_stock_data, get_financial_news, get_watchlist, add_to_watchlist, remove_from_watchlist
 from backend.ai_analyzer import analyze_sentiment, get_ai_summary, get_ai_comparison
 from backend.predictor import get_price_prediction
 
@@ -24,11 +25,13 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Helper Functions (remain the same) ---
+# --- Helper Functions ---
 def normalize_prices(df):
+    """Normalizes the 'Close' price of a dataframe to start at 100."""
     return (df['Close'] / df['Close'].iloc[0]) * 100
 
 def display_sentiment_bar(container, score):
+    """Displays a custom sentiment bar inside a given container."""
     sentiment_color = "green" if score > 0.05 else "red" if score < -0.05 else "orange"
     bar_width = (score + 1) * 50
     container.markdown(f"""
@@ -38,26 +41,46 @@ def display_sentiment_bar(container, score):
         </div>
     """, unsafe_allow_html=True)
 
-def display_stock_details(container, ticker_data, watchlist):
+def display_stock_details(container, ticker_data):
     """Displays the detailed data for a single stock."""
-    # --- Watchlist Button Logic ---
     uid = st.session_state.get('uid')
     ticker = ticker_data['ticker']
-    is_in_watchlist = ticker in watchlist
+    
+    print(f"Displaying stock details for {ticker} - UID: {uid}")
+    
+    # Always check the current state from the database
+    current_watchlist = get_watchlist(uid)
+    is_in_watchlist = ticker in current_watchlist
+    print(f"Current watchlist from DB: {current_watchlist}")
+    print(f"Stock {ticker} is in watchlist: {is_in_watchlist}")
 
     col1_header, col2_header = container.columns([3,1])
     col1_header.header(f"{ticker_data['info'].info.get('longName', ticker)}")
 
-    if is_in_watchlist:
-        if col2_header.button("⭐ Remove from Watchlist", key=f"details_remove_{ticker}", use_container_width=True):
-            remove_from_watchlist(uid, ticker)
-            st.rerun()
-    else:
-        if col2_header.button("➕ Add to Watchlist", key=f"details_add_{ticker}", use_container_width=True, type="primary"):
-            add_to_watchlist(uid, ticker)
-            st.rerun()
+    # Create a form for the watchlist button
+    with col2_header.form(key=f"watchlist_form_{ticker}"):
+        if is_in_watchlist:
+            submitted = st.form_submit_button("⭐ Remove from Watchlist", use_container_width=True)
+            if submitted:
+                print(f"Remove form submitted for {ticker}")
+                if remove_from_watchlist(uid, ticker):
+                    print(f"Successfully removed {ticker} from database")
+                    st.experimental_rerun()
+                else:
+                    print(f"Failed to remove {ticker} from database")
+                    st.error("Failed to remove from watchlist. Please try again.")
+        else:
+            submitted = st.form_submit_button("➕ Add to Watchlist", use_container_width=True, type="primary")
+            if submitted:
+                print(f"Add form submitted for {ticker}")
+                if add_to_watchlist(uid, ticker):
+                    print(f"Successfully added {ticker} to database")
+                    st.experimental_rerun()
+                else:
+                    print(f"Failed to add {ticker} to database")
+                    st.error("Failed to add to watchlist. Please try again.")
 
-    # --- Sub-tabs for details ---
+    # Rest of the display_stock_details function remains the same
     sub_tabs = container.tabs(["📊 Key Metrics", "💬 News Sentiment", "💰 Financials", "📰 Recent News"])
     with sub_tabs[0]:
         if ticker_data['hist'].empty:
@@ -73,9 +96,19 @@ def display_stock_details(container, ticker_data, watchlist):
         display_sentiment_bar(st, ticker_data['sentiment'])
     with sub_tabs[2]:
         st.write("**Income Statement**")
-        st.dataframe(ticker_data['info'].income_stmt.head())
+        income_stmt = ticker_data['info'].income_stmt
+        if not income_stmt.empty:
+            st.dataframe(income_stmt.head())
+        else:
+            st.write("Not Available")
+        
         st.write("**Balance Sheet**")
-        st.dataframe(ticker_data['info'].balance_sheet.head())
+        balance_sheet = ticker_data['info'].balance_sheet
+        if not balance_sheet.empty:
+            st.dataframe(balance_sheet.head())
+        else:
+            st.write("Not Available")
+            
     with sub_tabs[3]:
         if not ticker_data['news']:
             st.write("No recent news found.")
@@ -88,7 +121,7 @@ def display_stock_details(container, ticker_data, watchlist):
 
 # --- Main App ---
 st.markdown(f"""
-    # 📈 QuantView AI Analyser
+    # 📈 QuantView AI
     *Welcome, {st.session_state.get('email', 'Investor')}!*
 """)
 st.caption("Enter one or two stocks (comma-separated) for a side-by-side comparison.")
@@ -114,9 +147,10 @@ if analyze_button:
     if start_date >= end_date:
         st.warning("The start date must be before the end date.")
     else:
-        # Get the user's current watchlist to display the correct button state
+        # Fetch the watchlist from Firestore and store it in session_state
         uid = st.session_state.get('uid')
-        current_watchlist = get_watchlist(uid)
+        with st.spinner("Fetching watchlist..."):
+            st.session_state.watchlist = get_watchlist(uid)
 
         tickers = [ticker.strip() for ticker in tickers_input.split(',') if ticker.strip()]
         
@@ -140,13 +174,13 @@ if analyze_button:
             if not all_data:
                 st.stop()
 
-            # --- Create Main Tabs ---
+            # Create Main Tabs
             tab_list = ["📊 Performance", "🤖 AI Insights", "📈 Detailed Analysis"]
             if len(all_data) == 1:
                 tab_list.append("🔮 Price Prediction")
             main_tabs = st.tabs(tab_list)
 
-            with main_tabs[0]: # Performance Tab
+            with main_tabs[0]:
                 plot_data = [data for data in all_data if not data['hist'].empty]
                 if plot_data:
                     fig = go.Figure()
@@ -158,8 +192,7 @@ if analyze_button:
                 else:
                     st.info("No historical data to plot for the selected range.")
 
-
-            with main_tabs[1]: # AI Insights Tab
+            with main_tabs[1]:
                 if len(all_data) == 2:
                     ai_comp = get_ai_comparison(all_data[0], all_data[1], investor_level)
                     st.markdown(ai_comp)
@@ -167,15 +200,14 @@ if analyze_button:
                     ai_sum = get_ai_summary(all_data[0]['news'], all_data[0]['ticker'], investor_level)
                     st.markdown(ai_sum)
 
-            with main_tabs[2]: # Detailed Analysis Tab
+            with main_tabs[2]:
                 if len(all_data) == 1:
-                    display_stock_details(st, all_data[0], current_watchlist)
+                    display_stock_details(st, all_data[0])
                 elif len(all_data) == 2:
                     col1, col2 = st.columns(2)
-                    display_stock_details(col1, all_data[0], current_watchlist)
-                    display_stock_details(col2, all_data[1], current_watchlist)
+                    display_stock_details(col1, all_data[0])
+                    display_stock_details(col2, all_data[1])
 
-            # Price Prediction Tab
             if len(all_data) == 1 and len(main_tabs) == 4:
                 with main_tabs[3]:
                     st.header(f"30-Day Price Forecast for {all_data[0]['ticker']}")

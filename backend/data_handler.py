@@ -3,6 +3,7 @@ from newsapi import NewsApiClient
 import os
 from dotenv import load_dotenv
 from firebase_admin import firestore
+import time
 
 load_dotenv() # Load environment variables from .env file
 
@@ -49,31 +50,104 @@ def get_financial_news(ticker_symbol):
 def get_watchlist(uid):
     """Retrieves the watchlist for a given user ID."""
     if not uid:
+        print("No UID provided for get_watchlist")
         return []
     try:
-        watchlist_ref = db.collection('watchlists').document(uid).collection('stocks')
-        docs = watchlist_ref.stream()
-        return [doc.id for doc in docs]
+        print(f"Fetching watchlist for UID: {uid}")
+        # First, ensure the user's watchlist document exists
+        user_watchlist_ref = db.collection('users').document(uid)
+        user_watchlist = user_watchlist_ref.get()
+        
+        if not user_watchlist.exists:
+            print(f"Creating new watchlist document for user {uid}")
+            user_watchlist_ref.set({'created_at': firestore.SERVER_TIMESTAMP})
+        
+        # Now get the stocks collection
+        stocks_ref = user_watchlist_ref.collection('stocks')
+        docs = list(stocks_ref.stream())  # Convert to list to ensure we get all documents
+        watchlist = [doc.id for doc in docs]
+        print(f"Retrieved watchlist: {watchlist}")
+        return watchlist
     except Exception as e:
-        print(f"Error getting watchlist: {e}")
+        print(f"Error getting watchlist: {str(e)}")
+        import traceback
+        print(f"Full error traceback: {traceback.format_exc()}")
         return []
 
 def add_to_watchlist(uid, ticker):
     """Adds a ticker to the user's watchlist."""
     if not uid or not ticker:
-        return
+        print(f"Invalid parameters for add_to_watchlist - UID: {uid}, Ticker: {ticker}")
+        return False
     try:
-        watchlist_ref = db.collection('watchlists').document(uid).collection('stocks').document(ticker)
-        watchlist_ref.set({'added_on': firestore.SERVER_TIMESTAMP})
+        print(f"Adding {ticker} to watchlist for UID: {uid}")
+        # First, ensure the user's watchlist document exists
+        user_watchlist_ref = db.collection('users').document(uid)
+        user_watchlist = user_watchlist_ref.get()
+        
+        if not user_watchlist.exists:
+            print(f"Creating new watchlist document for user {uid}")
+            user_watchlist_ref.set({'created_at': firestore.SERVER_TIMESTAMP})
+        
+        # Add the stock to the user's watchlist
+        stock_ref = user_watchlist_ref.collection('stocks').document(ticker)
+        
+        # Create a batch write to ensure atomicity
+        batch = db.batch()
+        batch.set(stock_ref, {
+            'added_at': firestore.SERVER_TIMESTAMP,
+            'last_updated': firestore.SERVER_TIMESTAMP
+        })
+        
+        # Commit the batch
+        batch.commit()
+        
+        # Verify the write
+        stock_doc = stock_ref.get()
+        if stock_doc.exists:
+            print(f"Successfully added {ticker} to watchlist")
+            return True
+        else:
+            print(f"Failed to verify addition of {ticker} to watchlist")
+            return False
+            
     except Exception as e:
-        print(f"Error adding to watchlist: {e}")
+        print(f"Error adding to watchlist: {str(e)}")
+        import traceback
+        print(f"Full error traceback: {traceback.format_exc()}")
+        return False
 
 def remove_from_watchlist(uid, ticker):
     """Removes a ticker from the user's watchlist."""
     if not uid or not ticker:
-        return
+        print(f"Invalid parameters for remove_from_watchlist - UID: {uid}, Ticker: {ticker}")
+        return False
     try:
-        watchlist_ref = db.collection('watchlists').document(uid).collection('stocks').document(ticker)
-        watchlist_ref.delete()
+        print(f"Removing {ticker} from watchlist for UID: {uid}")
+        # Get the user's watchlist document
+        user_watchlist_ref = db.collection('users').document(uid)
+        
+        # Remove the stock from the user's watchlist
+        stock_ref = user_watchlist_ref.collection('stocks').document(ticker)
+        
+        # Create a batch write to ensure atomicity
+        batch = db.batch()
+        batch.delete(stock_ref)
+        
+        # Commit the batch
+        batch.commit()
+        
+        # Verify the deletion
+        stock_doc = stock_ref.get()
+        if not stock_doc.exists:
+            print(f"Successfully removed {ticker} from watchlist")
+            return True
+        else:
+            print(f"Failed to verify removal of {ticker} from watchlist")
+            return False
+            
     except Exception as e:
-        print(f"Error removing from watchlist: {e}")
+        print(f"Error removing from watchlist: {str(e)}")
+        import traceback
+        print(f"Full error traceback: {traceback.format_exc()}")
+        return False

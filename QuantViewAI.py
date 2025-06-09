@@ -15,13 +15,17 @@ st.set_page_config(
 # Initialize only once
 if not firebase_admin._apps:
     try:
+        print("Initializing Firebase...")
         # For local development, use the JSON file
         cred = credentials.Certificate("firebase_service_account.json")
         firebase_admin.initialize_app(cred)
+        print("Firebase initialized successfully")
     except FileNotFoundError:
+        print("Firebase Service Account key not found")
         st.error("Firebase Service Account key not found. Please ensure 'firebase_service_account.json' is in the root directory.")
         st.stop()
     except Exception as e:
+        print(f"Firebase initialization failed with error: {e}")
         st.error(f"Firebase initialization failed: {e}")
         st.stop()
 
@@ -32,7 +36,7 @@ if 'page' not in st.session_state:
     st.session_state['page'] = 'login'
 if 'email' not in st.session_state:
     st.session_state['email'] = ''
-if 'uid' not in st.session_state: # <-- NEW: Initialize UID
+if 'uid' not in st.session_state:
     st.session_state['uid'] = ''
 
 # --- UI Styling ---
@@ -80,17 +84,22 @@ def page_login():
                     st.warning("Please enter a valid email and password.")
                 else:
                     try:
+                        print(f"Attempting to login user: {email}")
                         user = auth.get_user_by_email(email)
+                        print(f"User found with UID: {user.uid}")
                         # Password check is simplified for this demo.
                         st.session_state['logged_in'] = True
                         st.session_state['email'] = user.email
-                        st.session_state['uid'] = user.uid # <-- NEW: Store the user's unique ID
+                        st.session_state['uid'] = user.uid
+                        print(f"Session state updated - UID: {st.session_state['uid']}")
                         st.success("Login Successful!")
                         time.sleep(1)
                         st.switch_page("pages/1_Analyser.py")
                     except auth.UserNotFoundError:
+                        print(f"User not found: {email}")
                         st.error("No account found with this email. Please sign up.")
                     except Exception as e:
+                        print(f"Login failed with error: {e}")
                         st.error(f"Login failed. Note: Password check is simplified for this demo.")
         with col2:
             if st.button("Sign Up Instead", use_container_width=True):

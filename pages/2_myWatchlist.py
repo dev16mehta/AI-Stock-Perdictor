@@ -15,7 +15,7 @@ from backend.data_handler import get_watchlist, get_stock_data, remove_from_watc
 st.set_page_config(page_title="My Watchlist", page_icon="⭐", layout="wide")
 
 st.markdown(f"""
-    #My Watchlist
+    # My Watchlist
     *Welcome back, {st.session_state.get('email', 'Investor')}!*
 """)
 st.divider()
@@ -23,12 +23,9 @@ st.divider()
 # --- State & Helper Functions ---
 uid = st.session_state.get('uid')
 
-# Load the watchlist from Firestore
-try:
-    watchlist = get_watchlist(uid)
-except Exception as e:
-    st.error(f"Could not load watchlist: {e}")
-    watchlist = []
+# Get the current watchlist from the database
+watchlist = get_watchlist(uid)
+print(f"Current watchlist from DB: {watchlist}")
 
 # --- Display Watchlist ---
 if not watchlist:
@@ -73,10 +70,12 @@ else:
             with col4:
                 # The 'key' is crucial to make each button unique
                 if st.button("❌ Remove", key=f"remove_{ticker}"):
-                    remove_from_watchlist(uid, ticker)
-                    # Clear the cached data for the removed stock
-                    if ticker in st.session_state.watchlist_data:
-                        del st.session_state.watchlist_data[ticker]
-                    st.rerun() # Rerun the page to reflect the change
+                    if remove_from_watchlist(uid, ticker):
+                        # Clear the cached data for the removed stock
+                        if ticker in st.session_state.watchlist_data:
+                            del st.session_state.watchlist_data[ticker]
+                        st.experimental_rerun() # Rerun the page to reflect the change
+                    else:
+                        st.error(f"Failed to remove {ticker} from watchlist. Please try again.")
 
             st.divider()
