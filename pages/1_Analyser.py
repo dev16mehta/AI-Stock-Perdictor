@@ -11,7 +11,7 @@ if not st.session_state.get("logged_in", False):
     st.stop()
 
 # This tells Python to look in the parent directory for modules
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from backend.data_handler import get_stock_data, get_financial_news
 from backend.ai_analyzer import analyze_sentiment, get_ai_summary, get_ai_comparison
@@ -175,4 +175,3 @@ if analyze_button:
                         st.warning("Could not generate a forecast. The stock may not have enough historical data (at least 30 data points are recommended).")
 else:
     st.info("Enter a stock and click 'Analyse Stocks' to begin.")
-
