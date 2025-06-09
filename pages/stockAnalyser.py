@@ -117,9 +117,9 @@ if analyze_button:
                 st.stop()
 
             # --- Create Main Tabs ---
-            tab_list = ["📊 Performance", "🤖 AI Insights", "📈 Detailed Analysis"]
+            tab_list = ["Performance", "AI Insights", "Detailed Analysis"]
             if len(all_data) == 1:
-                tab_list.append("🔮 Price Prediction")
+                tab_list.append("Price Prediction")
             main_tabs = st.tabs(tab_list)
 
             with main_tabs[0]: # Performance Tab
