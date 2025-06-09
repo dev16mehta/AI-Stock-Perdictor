@@ -2,8 +2,11 @@ import yfinance as yf
 from newsapi import NewsApiClient
 import os
 from dotenv import load_dotenv
+from firebase_admin import firestore
 
 load_dotenv() # Load environment variables from .env file
+
+db = firestore.client() # Initialize Firestore client
 
 def get_stock_data(ticker, start_date, end_date):
     """
@@ -40,3 +43,37 @@ def get_financial_news(ticker_symbol):
     except Exception as e:
         print(f"Error fetching news for {ticker_symbol}: {e}")
         return []
+
+# --- WATCHLIST FUNCTIONS ---
+
+def get_watchlist(uid):
+    """Retrieves the watchlist for a given user ID."""
+    if not uid:
+        return []
+    try:
+        watchlist_ref = db.collection('watchlists').document(uid).collection('stocks')
+        docs = watchlist_ref.stream()
+        return [doc.id for doc in docs]
+    except Exception as e:
+        print(f"Error getting watchlist: {e}")
+        return []
+
+def add_to_watchlist(uid, ticker):
+    """Adds a ticker to the user's watchlist."""
+    if not uid or not ticker:
+        return
+    try:
+        watchlist_ref = db.collection('watchlists').document(uid).collection('stocks').document(ticker)
+        watchlist_ref.set({'added_on': firestore.SERVER_TIMESTAMP})
+    except Exception as e:
+        print(f"Error adding to watchlist: {e}")
+
+def remove_from_watchlist(uid, ticker):
+    """Removes a ticker from the user's watchlist."""
+    if not uid or not ticker:
+        return
+    try:
+        watchlist_ref = db.collection('watchlists').document(uid).collection('stocks').document(ticker)
+        watchlist_ref.delete()
+    except Exception as e:
+        print(f"Error removing from watchlist: {e}")
