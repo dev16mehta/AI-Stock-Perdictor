@@ -21,28 +21,33 @@ st.markdown(f"""
 st.divider()
 
 # --- Callback Function ---
-def handle_remove_from_watchlist(uid, ticker):
+def handle_remove(uid, ticker):
     """Callback to remove a stock from the watchlist page."""
     remove_from_watchlist(uid, ticker)
+    if ticker in st.session_state.get('watchlist', []):
+        st.session_state.watchlist.remove(ticker)
     if ticker in st.session_state.get('watchlist_data', {}):
         del st.session_state.watchlist_data[ticker]
+    st.toast(f"Removed {ticker} from your watchlist.", icon="🗑️")
 
-# --- State & Data Loading ---
+# --- Data Loading ---
 uid = st.session_state.get('uid')
-watchlist = get_watchlist(uid)
+# Use session state to store watchlist to prevent re-fetching on every interaction
+if 'watchlist' not in st.session_state:
+    st.session_state.watchlist = get_watchlist(uid)
 
 # --- Display Watchlist ---
-if not watchlist:
-    st.info("Your watchlist is empty. Go to the Analyser to add stocks!")
+if not st.session_state.watchlist:
+    st.info("Your watchlist is empty. Go to the Analyser page to add stocks!")
 else:
-    st.success(f"You are watching {len(watchlist)} stock(s).")
+    st.success(f"You are watching {len(st.session_state.watchlist)} stock(s).")
     
     if 'watchlist_data' not in st.session_state:
         st.session_state.watchlist_data = {}
 
     with st.spinner("Loading watchlist data..."):
         today = date.today()
-        for ticker in watchlist:
+        for ticker in st.session_state.watchlist:
             if ticker not in st.session_state.watchlist_data:
                 stock_info, stock_hist = get_stock_data(ticker, start_date=(today - timedelta(days=5)), end_date=today)
                 if stock_info and not stock_hist.empty:
@@ -51,8 +56,8 @@ else:
                         'price': stock_hist['Close'].iloc[-1]
                     }
 
-    # Display each stock using its own container
-    for ticker in watchlist:
+    # Display each stock
+    for ticker in list(st.session_state.watchlist): # Iterate over a copy
         if ticker in st.session_state.watchlist_data:
             data = st.session_state.watchlist_data[ticker]
             with st.container():
@@ -61,5 +66,5 @@ else:
                 col1.caption(ticker)
                 col2.metric("Last Price", f"${data['price']:,.2f}")
                 col3.metric("Market Cap", f"${data['info'].get('marketCap', 0) / 1e9:,.2f}B")
-                col4.button("❌ Remove", key=f"remove_watchlist_{ticker}", on_click=handle_remove_from_watchlist, args=(uid, ticker))
+                col4.button("❌ Remove", key=f"remove_watchlist_{ticker}", on_click=handle_remove, args=(uid, ticker))
                 st.divider()
