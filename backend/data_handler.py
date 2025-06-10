@@ -31,7 +31,7 @@ def get_financial_news(ticker_symbol):
         print(f"Error fetching news for {ticker_symbol}: {e}")
         return []
 
-# --- NEW, SIMPLIFIED WATCHLIST FUNCTIONS ---
+# --- Simplified Watchlist Functions for Callbacks ---
 
 def get_watchlist(uid):
     """Retrieves the watchlist for a given user ID."""
@@ -50,7 +50,7 @@ def add_to_watchlist(uid, ticker):
         db.collection('users').document(uid).collection('stocks').document(ticker).set({
             'added_at': firestore.SERVER_TIMESTAMP
         })
-        print(f"Successfully added {ticker} to Firestore for user {uid}")
+        print(f"Firestore: Added {ticker} for user {uid}")
     except Exception as e:
         print(f"Error adding {ticker} to watchlist: {e}")
 
@@ -59,6 +59,6 @@ def remove_from_watchlist(uid, ticker):
     if not uid or not ticker: return
     try:
         db.collection('users').document(uid).collection('stocks').document(ticker).delete()
-        print(f"Successfully removed {ticker} from Firestore for user {uid}")
+        print(f"Firestore: Removed {ticker} for user {uid}")
     except Exception as e:
         print(f"Error removing {ticker} from watchlist: {e}")
