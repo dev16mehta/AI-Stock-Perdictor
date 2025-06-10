@@ -61,7 +61,6 @@ def display_stock_details(container, ticker_data):
     else:
         col2_header.button("➕ Add to Watchlist", key=f"add_{ticker}", on_click=handle_add, args=(uid, ticker), use_container_width=True, type="primary")
 
-    # (The rest of this function is the same as your version)
     sub_tabs = container.tabs(["📊 Key Metrics", "💬 News Sentiment", "💰 Financials", "📰 Recent News"])
     with sub_tabs[0]:
         if ticker_data['hist'].empty:
@@ -115,7 +114,6 @@ if analyze_button:
     else:
         uid = st.session_state.get('uid')
         with st.spinner("Fetching watchlist..."):
-            # Load watchlist into session state ONCE per analysis
             st.session_state.watchlist = get_watchlist(uid)
 
         tickers = [ticker.strip() for ticker in tickers_input.split(',') if ticker.strip()]
@@ -127,11 +125,12 @@ if analyze_button:
                 for ticker in tickers:
                     stock_info, stock_hist = get_stock_data(ticker, start_date, end_date)
                     if stock_info:
+                        news = get_financial_news(ticker)
                         all_data.append({
                             "ticker": ticker, "info": stock_info, 
                             "hist": stock_hist if stock_hist is not None else pd.DataFrame(),
-                            "news": get_financial_news(ticker), 
-                            "sentiment": analyze_sentiment(get_financial_news(ticker))
+                            "news": news, 
+                            "sentiment": analyze_sentiment(news)
                         })
                     else:
                         st.error(f"Could not retrieve data for {ticker}. It may be an invalid ticker symbol.")
@@ -142,21 +141,52 @@ if analyze_button:
             if len(all_data) == 1: tab_list.append("🔮 Price Prediction")
             main_tabs = st.tabs(tab_list)
 
-            with main_tabs[0]: # Performance
-                # (This section is the same as your version)
-                ...
-            with main_tabs[1]: # AI Insights
-                # (This section is the same as your version)
-                ...
-            with main_tabs[2]: # Detailed Analysis
+            with main_tabs[0]: # Performance Tab
+                plot_data = [data for data in all_data if not data['hist'].empty]
+                if plot_data:
+                    fig = go.Figure()
+                    for data in plot_data:
+                        normalized_hist = normalize_prices(data['hist'])
+                        fig.add_trace(go.Scatter(x=normalized_hist.index, y=normalized_hist, mode='lines', name=data['ticker']))
+                    fig.update_layout(title="Normalized Price Performance (starting at 100)", yaxis_title="Normalized Price")
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("No historical data to plot for the selected range.")
+
+            with main_tabs[1]: # AI Insights Tab
+                if len(all_data) == 2:
+                    with st.spinner("Generating AI comparison..."):
+                        ai_comp = get_ai_comparison(all_data[0], all_data[1], investor_level)
+                    st.markdown(ai_comp)
+                else:
+                    with st.spinner("Generating AI summary..."):
+                        ai_sum = get_ai_summary(all_data[0]['news'], all_data[0]['ticker'], investor_level)
+                    st.markdown(ai_sum)
+
+            with main_tabs[2]: # Detailed Analysis Tab
                 if len(all_data) == 1:
                     display_stock_details(st, all_data[0])
                 elif len(all_data) == 2:
                     col1, col2 = st.columns(2)
                     display_stock_details(col1, all_data[0])
                     display_stock_details(col2, all_data[1])
-            if len(all_data) == 1 and len(main_tabs) == 4: # Prediction
-                # (This section is the same as your version)
-                ...
+                    
+            if len(all_data) == 1 and len(main_tabs) == 4: # Prediction Tab
+                with main_tabs[3]:
+                    st.header(f"30-Day Price Forecast for {all_data[0]['ticker']}")
+                    with st.spinner("Generating price forecast..."):
+                        forecast = get_price_prediction(all_data[0]['hist'])
+                    
+                    if forecast is not None:
+                        fig = go.Figure()
+                        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast', line=dict(color='royalblue', dash='dash')))
+                        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], fill=None, mode='lines', line=dict(color='lightgray'), showlegend=False))
+                        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], fill='tonexty', mode='lines', line=dict(color='lightgray'), name='Uncertainty'))
+                        fig.add_trace(go.Scatter(x=all_data[0]['hist'].index, y=all_data[0]['hist']['Close'], mode='lines', name='Actual Price', line=dict(color='black')))
+                        
+                        fig.update_layout(title='Price Forecast with Uncertainty Interval', yaxis_title='Price (USD)')
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.warning("Could not generate a forecast. The stock may not have enough historical data (at least 30 data points are recommended).")
 else:
     st.info("Enter a stock and click 'Analyse Stocks' to begin.")
