@@ -15,18 +15,18 @@ st.set_page_config(
 # Initialize only once
 if not firebase_admin._apps:
     try:
-        print("Initializing Firebase...")
-        # For local development, use the JSON file
-        cred = credentials.Certificate("firebase_service_account.json")
+        # Check if we are in a deployed environment (Streamlit Cloud)
+        if 'firebase_service_account' in st.secrets:
+            # Use the secrets from Streamlit Cloud
+            cred_dict = st.secrets["firebase_service_account"]
+        else:
+            # Use the local file for local development
+            cred_dict = "firebase_service_account.json"
+        
+        cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
-        print("Firebase initialized successfully")
-    except FileNotFoundError:
-        print("Firebase Service Account key not found")
-        st.error("Firebase Service Account key not found. Please ensure 'firebase_service_account.json' is in the root directory.")
-        st.stop()
     except Exception as e:
-        print(f"Firebase initialization failed with error: {e}")
-        st.error(f"Firebase initialization failed: {e}")
+        st.error(f"Firebase initialization failed. Ensure your secrets are configured correctly. Error: {e}")
         st.stop()
 
 # --- Session State Initialization ---
