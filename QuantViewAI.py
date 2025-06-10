@@ -18,7 +18,7 @@ if not firebase_admin._apps:
         # Check if we are in a deployed environment (Streamlit Cloud)
         if 'firebase_service_account' in st.secrets:
             # Use the secrets from Streamlit Cloud
-            cred_dict = st.secrets["firebase_service_account"]
+            cred_dict = dict(st.secrets["firebase_service_account"])
         else:
             # Use the local file for local development
             cred_dict = "firebase_service_account.json"

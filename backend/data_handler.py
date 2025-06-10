@@ -3,6 +3,7 @@ from newsapi import NewsApiClient
 import os
 from dotenv import load_dotenv
 from firebase_admin import firestore
+import streamlit as st
 
 load_dotenv() 
 
