@@ -71,7 +71,7 @@ def navigate_to(page):
 
 # --- Login Page UI ---
 def page_login():
-    st.title("🔐 QuantView AI Login")
+    st.title("🔐 QuantView AI")
     
     with st.container(border=True):
         email = st.text_input("Email", key="login_email")

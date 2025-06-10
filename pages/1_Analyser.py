@@ -18,17 +18,17 @@ from backend.ai_analyzer import analyze_sentiment, get_ai_summary, get_ai_compar
 from backend.predictor import get_price_prediction
 
 # --- Page Configuration ---
-st.set_page_config(page_title="QuantView AI Analyser", page_icon="📈", layout="wide")
+st.set_page_config(page_title="QuantView AI", page_icon="📈", layout="wide")
 
-# --- NEW: Callback Functions ---
-def handle_add(uid, ticker):
-    """Callback to add a stock to the watchlist."""
+# --- Callback Functions for Watchlist ---
+def handle_add_to_watchlist(uid, ticker):
+    """Callback function to add a stock. Updates DB and session state."""
     add_to_watchlist(uid, ticker)
     if ticker not in st.session_state.watchlist:
         st.session_state.watchlist.append(ticker)
 
-def handle_remove(uid, ticker):
-    """Callback to remove a stock from the watchlist."""
+def handle_remove_from_watchlist(uid, ticker):
+    """Callback function to remove a stock. Updates DB and session state."""
     remove_from_watchlist(uid, ticker)
     if ticker in st.session_state.watchlist:
         st.session_state.watchlist.remove(ticker)
@@ -57,9 +57,9 @@ def display_stock_details(container, ticker_data):
 
     # Use on_click callbacks for instant UI updates
     if is_in_watchlist:
-        col2_header.button("⭐ Remove from Watchlist", key=f"remove_{ticker}", on_click=handle_remove, args=(uid, ticker), use_container_width=True)
+        col2_header.button("⭐ Remove from Watchlist", key=f"remove_{ticker}", on_click=handle_remove_from_watchlist, args=(uid, ticker), use_container_width=True)
     else:
-        col2_header.button("➕ Add to Watchlist", key=f"add_{ticker}", on_click=handle_add, args=(uid, ticker), use_container_width=True, type="primary")
+        col2_header.button("➕ Add to Watchlist", key=f"add_{ticker}", on_click=handle_add_to_watchlist, args=(uid, ticker), use_container_width=True, type="primary")
 
     sub_tabs = container.tabs(["📊 Key Metrics", "💬 News Sentiment", "💰 Financials", "📰 Recent News"])
     with sub_tabs[0]:
@@ -89,7 +89,7 @@ def display_stock_details(container, ticker_data):
 
 # --- Main App ---
 st.markdown(f"""
-    # 📈 QuantView AI
+    # QuantView AI
     *Welcome, {st.session_state.get('email', 'Investor')}!*
 """)
 st.caption("Enter one or two stocks (comma-separated) for a side-by-side comparison.")
@@ -135,12 +135,15 @@ if analyze_button:
                     else:
                         st.error(f"Could not retrieve data for {ticker}. It may be an invalid ticker symbol.")
             
-            if not all_data: st.stop()
+            if not all_data: 
+                st.stop()
 
-            tab_list = ["📊 Performance", "🤖 AI Insights", "📈 Detailed Analysis"]
-            if len(all_data) == 1: tab_list.append("🔮 Price Prediction")
+            tab_list = ["Performance", "AI Insights", "Detailed Analysis"]
+            if len(all_data) == 1: 
+                tab_list.append("Price Prediction")
             main_tabs = st.tabs(tab_list)
 
+            # --- FIX: Replaced Ellipsis with actual content ---
             with main_tabs[0]: # Performance Tab
                 plot_data = [data for data in all_data if not data['hist'].empty]
                 if plot_data:
@@ -153,6 +156,7 @@ if analyze_button:
                 else:
                     st.info("No historical data to plot for the selected range.")
 
+            # --- FIX: Replaced Ellipsis with actual content ---
             with main_tabs[1]: # AI Insights Tab
                 if len(all_data) == 2:
                     with st.spinner("Generating AI comparison..."):
