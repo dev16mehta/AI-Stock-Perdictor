@@ -21,9 +21,17 @@ def get_stock_data(ticker, start_date, end_date):
 
 def get_financial_news(ticker_symbol):
     """Fetches financial news from NewsAPI."""
-    api_key = os.getenv("NEWS_API_KEY")
+    # Check for secrets first, then fall back to environment variables
+    if 'NEWS_API_KEY' in st.secrets:
+        api_key = st.secrets['NEWS_API_KEY']
+    else:
+        api_key = os.getenv("NEWS_API_KEY")
+
     if not api_key:
+        print("Error: NEWS_API_KEY not found in secrets or .env file.")
         return []
+    
+    # (The rest of the function remains the same)
     try:
         newsapi = NewsApiClient(api_key=api_key)
         return newsapi.get_everything(q=ticker_symbol, language='en', sort_by='relevancy', page_size=20).get('articles', [])
