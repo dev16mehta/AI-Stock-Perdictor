@@ -6,9 +6,10 @@ langchain
 langchain-groq
 python-dotenv
 pandas
-numpy
+numpy==1.23.5
 scikit-learn
 plotly
 firebase-admin
 prophet
 pandas-ta
+setuptools

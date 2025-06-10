@@ -3,13 +3,15 @@ import pandas_ta as ta
 
 def add_technical_indicators(df):
     """
-    Calculates and adds technical indicators to the historical data DataFrame.
+    Calculates and adds a comprehensive set of technical indicators 
+    to the historical data DataFrame using the pandas-ta library.
     
     Args:
-        df (pd.DataFrame): The stock's historical price data.
+        df (pd.DataFrame): The stock's historical price data. 
+                           It must have 'Open', 'High', 'Low', 'Close', 'Volume' columns.
         
     Returns:
-        pd.DataFrame: The DataFrame with added indicator columns.
+        pd.DataFrame: The original DataFrame with new columns for each indicator.
     """
     if df.empty:
         return df
@@ -24,9 +26,18 @@ def add_technical_indicators(df):
     # Bollinger Bands
     bollinger = ta.bbands(df['Close'], length=20)
     if bollinger is not None and not bollinger.empty:
-        df = df.join(bollinger) # Joins BBL_20_2.0, BBM_20_2.0, BBU_20_2.0, etc.
+        df = df.join(bollinger)
 
     # Relative Strength Index (RSI)
     df['RSI_14'] = ta.rsi(df['Close'], length=14)
+    
+    # Moving Average Convergence Divergence (MACD)
+    macd = ta.macd(df['Close'])
+    if macd is not None and not macd.empty:
+        # Join the MACD line, signal line, and histogram
+        df = df.join(macd)
+
+    # On-Balance Volume (OBV)
+    df['OBV'] = ta.obv(df['Close'], df['Volume'])
     
     return df
