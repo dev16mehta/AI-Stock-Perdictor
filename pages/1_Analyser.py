@@ -16,7 +16,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from backend.data_handler import get_stock_data, get_financial_news, get_watchlist, add_to_watchlist, remove_from_watchlist
 from backend.ai_analyzer import analyze_sentiment, get_ai_summary, get_ai_comparison
 from backend.predictor import get_price_prediction
-from backend.technical_analyzer import add_technical_indicators # <-- NEW IMPORT
+from backend.technical_analyzer import add_technical_indicators
 
 # --- Page Configuration ---
 st.set_page_config(page_title="QuantView AI Analyser", page_icon="📈", layout="wide")
@@ -34,6 +34,10 @@ def handle_remove(uid, ticker):
         st.session_state.watchlist.remove(ticker)
     st.toast(f"Removed {ticker} from your watchlist.", icon="🗑️")
 
+def normalize_prices(df):
+    """Normalizes the 'Close' price of a dataframe to start at 100."""
+    return (df['Close'] / df['Close'].iloc[0]) * 100
+    
 def display_stock_details(container, ticker_data):
     uid = st.session_state.get('uid')
     ticker = ticker_data['ticker']
@@ -74,24 +78,28 @@ st.divider()
 # --- Sidebar ---
 with st.sidebar:
     st.header("Stock Selection")
-    tickers_input = st.text_input("Enter a stock ticker (e.g., AAPL)", "TSLA").upper()
+    tickers_input = st.text_input("Enter stock(s) (e.g., AAPL,MSFT)", "TSLA").upper()
     
-    st.header("Chart Options")
-    indicator_options = ["SMA 20", "SMA 50", "EMA 20", "Bollinger Bands", "RSI", "MACD", "OBV"]
-    selected_indicators = st.multiselect("Select technical indicators:", indicator_options, default=[])
+    st.header("AI Analysis Level")
+    investor_level = st.selectbox("Choose your investor profile:", ("Beginner", "Advanced"))
+
+    # --- ADVANCED MODE LOGIC: Only show these options if the user is 'Advanced' ---
+    selected_indicators = []
+    if investor_level == "Advanced":
+        st.header("Chart Options")
+        st.info("Technical analysis is best viewed for a single stock.")
+        indicator_options = ["SMA 20", "SMA 50", "EMA 20", "Bollinger Bands", "RSI", "MACD", "OBV"]
+        selected_indicators = st.multiselect("Select technical indicators:", indicator_options, default=["SMA 20", "SMA 50"])
 
     st.header("Date Range")
     today = date.today()
     start_date = st.date_input("Start Date", today - timedelta(days=730))
     end_date = st.date_input("End Date", today)
     
-    st.header("AI Analysis Level")
-    investor_level = st.selectbox("Choose your investor profile:", ("Beginner", "Advanced"))
-    
     if 'watchlist' not in st.session_state:
         st.session_state.watchlist = get_watchlist(st.session_state.get('uid'))
     
-    analyze_button = st.button("Analyse Stock", type="primary")
+    analyze_button = st.button("Analyse Stock(s)", type="primary")
 
 # --- Main Content Logic ---
 if analyze_button:
@@ -99,96 +107,115 @@ if analyze_button:
         st.warning("The start date must be before the end date.")
     else:
         st.session_state.watchlist = get_watchlist(st.session_state.get('uid'))
-        # Technical analysis is best for a single stock
-        ticker = tickers_input.split(',')[0].strip()
+        tickers = [ticker.strip() for ticker in tickers_input.split(',') if ticker.strip()]
         
-        if not ticker:
+        if not tickers:
             st.warning("Please enter at least one valid stock ticker.")
         else:
             all_data = []
-            with st.spinner(f"Fetching and analysing {ticker}..."):
-                stock_info, stock_hist = get_stock_data(ticker, start_date, end_date)
-                if stock_info:
-                    stock_hist_with_ta = add_technical_indicators(stock_hist.copy())
-                    news = get_financial_news(ticker)
-                    all_data.append({
-                        "ticker": ticker, "info": stock_info, 
-                        "hist": stock_hist_with_ta,
-                        "news": news, 
-                        "sentiment": analyze_sentiment(news)
-                    })
-                else:
-                    st.error(f"Could not retrieve data for {ticker}.")
+            with st.spinner(f"Fetching and analysing {', '.join(tickers)}..."):
+                for ticker in tickers:
+                    stock_info, stock_hist = get_stock_data(ticker, start_date, end_date)
+                    if stock_info:
+                        # --- ADVANCED MODE LOGIC: Only calculate TA if in advanced mode ---
+                        if investor_level == "Advanced":
+                            stock_hist = add_technical_indicators(stock_hist.copy())
+                        
+                        news = get_financial_news(ticker)
+                        all_data.append({
+                            "ticker": ticker, "info": stock_info, 
+                            "hist": stock_hist,
+                            "news": news, 
+                            "sentiment": analyze_sentiment(news)
+                        })
+                    else:
+                        st.error(f"Could not retrieve data for {ticker}.")
             
             if not all_data: st.stop()
 
             # --- Tab Creation ---
-            tab_list = ["Advanced Chart", "AI Insights", "Detailed Analysis", "Price Prediction"]
+            tab_list = ["Chart", "AI Insights", "Detailed Analysis", "Price Prediction"]
             main_tabs = st.tabs(tab_list)
 
-            with main_tabs[0]: # Advanced Chart Tab
-                stock_df = all_data[0]['hist']
-                if not stock_df.empty:
-                    # Create subplots: 1 for price, 1 for MACD, 1 for RSI/OBV
-                    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, 
-                                        vertical_spacing=0.03, row_heights=[0.6, 0.2, 0.2])
+            with main_tabs[0]: # Chart Tab
+                # --- ADVANCED MODE LOGIC: Show different charts based on user level ---
+                if investor_level == "Advanced":
+                    st.header(f"Advanced Chart for {all_data[0]['ticker']}")
+                    stock_df = all_data[0]['hist']
+                    if not stock_df.empty:
+                        fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.6, 0.2, 0.2])
+                        fig.add_trace(go.Candlestick(x=stock_df.index, open=stock_df['Open'], high=stock_df['High'],low=stock_df['Low'], close=stock_df['Close'], name='Price'), row=1, col=1)
 
-                    # Plot Main Price Candlestick
-                    fig.add_trace(go.Candlestick(x=stock_df.index, open=stock_df['Open'], high=stock_df['High'],
-                                                 low=stock_df['Low'], close=stock_df['Close'], name='Price'), row=1, col=1)
+                        # Plot selected indicators on the main chart
+                        if "SMA 20" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_20'], mode='lines', name='SMA 20', line=dict(width=1)), row=1, col=1)
+                        if "SMA 50" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_50'], mode='lines', name='SMA 50', line=dict(width=1)), row=1, col=1)
+                        if "EMA 20" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['EMA_20'], mode='lines', name='EMA 20', line=dict(width=1, dash='dash')), row=1, col=1)
+                        if "Bollinger Bands" in selected_indicators and 'BBU_20_2.0' in stock_df.columns:
+                            fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['BBU_20_2.0'], line=dict(color='gray', width=0.5), name='Upper Band'), row=1, col=1)
+                            fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['BBL_20_2.0'], line=dict(color='gray', width=0.5), fill='tonexty', fillcolor='rgba(128,128,128,0.1)', name='Lower Band'), row=1, col=1)
+                        
+                        if "MACD" in selected_indicators and 'MACD_12_26_9' in stock_df.columns:
+                            fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['MACD_12_26_9'], name='MACD', line=dict(color='blue', width=1)), row=2, col=1)
+                            fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['MACDs_12_26_9'], name='Signal', line=dict(color='orange', width=1)), row=2, col=1)
+                            fig.add_trace(go.Bar(x=stock_df.index, y=stock_df['MACDh_12_26_9'], name='Histogram', marker_color=['green' if val >= 0 else 'red' for val in stock_df['MACDh_12_26_9']]), row=2, col=1)
+                            fig.update_yaxes(title_text="MACD", row=2, col=1)
+                        
+                        if "RSI" in selected_indicators:
+                            fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['RSI_14'], mode='lines', name='RSI'), row=3, col=1)
+                            fig.add_hline(y=70, row=3, col=1, line_dash="dash", line_color="red", line_width=1); fig.add_hline(y=30, row=3, col=1, line_dash="dash", line_color="green", line_width=1)
+                            fig.update_yaxes(title_text="RSI", row=3, col=1)
+                        elif "OBV" in selected_indicators:
+                            fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['OBV'], mode='lines', name='OBV'), row=3, col=1)
+                            fig.update_yaxes(title_text="OBV", row=3, col=1)
+                        
+                        fig.update_layout(title_text=f"{all_data[0]['ticker']} Advanced Chart", xaxis_rangeslider_visible=False, height=700)
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.info("No data to plot.")
+                else: # Beginner Mode
+                    st.header("Performance Comparison")
+                    plot_data = [data for data in all_data if not data['hist'].empty]
+                    if plot_data:
+                        fig = go.Figure()
+                        for data in plot_data:
+                            normalized_hist = normalize_prices(data['hist'])
+                            fig.add_trace(go.Scatter(x=normalized_hist.index, y=normalized_hist, mode='lines', name=data['ticker']))
+                        fig.update_layout(title="Normalized Price Performance (starting at 100)", yaxis_title="Normalized Price")
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.info("No data to plot.")
 
-                    # Plot selected indicators on the main chart
-                    if "SMA 20" in selected_indicators:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_20'], mode='lines', name='SMA 20', line=dict(width=1)), row=1, col=1)
-                    if "SMA 50" in selected_indicators:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_50'], mode='lines', name='SMA 50', line=dict(width=1)), row=1, col=1)
-                    if "EMA 20" in selected_indicators:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['EMA_20'], mode='lines', name='EMA 20', line=dict(width=1, dash='dash')), row=1, col=1)
-                    if "Bollinger Bands" in selected_indicators and 'BBU_20_2.0' in stock_df.columns:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['BBU_20_2.0'], line=dict(color='gray', width=0.5), name='Upper Band'), row=1, col=1)
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['BBL_20_2.0'], line=dict(color='gray', width=0.5), fill='tonexty', fillcolor='rgba(128,128,128,0.1)', name='Lower Band'), row=1, col=1)
-                    
-                    # Plot MACD on the second subplot
-                    if "MACD" in selected_indicators and 'MACD_12_26_9' in stock_df.columns:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['MACD_12_26_9'], name='MACD', line=dict(color='blue', width=1)), row=2, col=1)
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['MACDs_12_26_9'], name='Signal', line=dict(color='orange', width=1)), row=2, col=1)
-                        colors = ['green' if val >= 0 else 'red' for val in stock_df['MACDh_12_26_9']]
-                        fig.add_trace(go.Bar(x=stock_df.index, y=stock_df['MACDh_12_26_9'], name='Histogram', marker_color=colors), row=2, col=1)
-                        fig.update_yaxes(title_text="MACD", row=2, col=1)
-                    
-                    # Plot RSI or OBV on the third subplot
-                    if "RSI" in selected_indicators:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['RSI_14'], mode='lines', name='RSI'), row=3, col=1)
-                        fig.add_hline(y=70, row=3, col=1, line_dash="dash", line_color="red", line_width=1)
-                        fig.add_hline(y=30, row=3, col=1, line_dash="dash", line_color="green", line_width=1)
-                        fig.update_yaxes(title_text="RSI", row=3, col=1)
-                    elif "OBV" in selected_indicators:
-                        fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['OBV'], mode='lines', name='OBV'), row=3, col=1)
-                        fig.update_yaxes(title_text="OBV", row=3, col=1)
-                    
-                    fig.update_layout(title_text=f"{ticker} Advanced Chart", xaxis_rangeslider_visible=False, height=700, showlegend=True)
-                    fig.update_yaxes(title_text="Price (USD)", row=1, col=1)
-                    st.plotly_chart(fig, use_container_width=True)
-                else:
-                    st.info("No data to plot.")
-            
             with main_tabs[1]:
-                ai_sum = get_ai_summary(all_data[0]['news'], all_data[0]['ticker'], investor_level)
-                st.markdown(ai_sum)
+                # This logic remains the same, but now works with multiple stocks for beginners
+                if len(all_data) > 1:
+                    st.info("AI Insights below compare the first two selected stocks.")
+                    ai_comp = get_ai_comparison(all_data[0], all_data[1], investor_level)
+                    st.markdown(ai_comp)
+                else:
+                    ai_sum = get_ai_summary(all_data[0]['news'], all_data[0]['ticker'], investor_level)
+                    st.markdown(ai_sum)
 
             with main_tabs[2]:
-                display_stock_details(st, all_data[0])
+                if len(all_data) == 1:
+                    display_stock_details(st, all_data[0])
+                else:
+                    col1, col2 = st.columns(2)
+                    if len(all_data) > 0: display_stock_details(col1, all_data[0])
+                    if len(all_data) > 1: display_stock_details(col2, all_data[1])
                     
             with main_tabs[3]:
-                st.header(f"30-Day Price Forecast for {ticker}")
-                with st.spinner("Generating price forecast..."): forecast = get_price_prediction(all_data[0]['hist'])
-                if forecast is not None:
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast', line=dict(color='royalblue', dash='dash')))
-                    fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], fill=None, mode='lines', line=dict(color='lightgray'), showlegend=False))
-                    fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], fill='tonexty', mode='lines', line=dict(color='lightgray'), name='Uncertainty'))
-                    fig.add_trace(go.Scatter(x=all_data[0]['hist'].index, y=all_data[0]['hist']['Close'], mode='lines', name='Actual Price', line=dict(color='black')))
-                    fig.update_layout(title='Price Forecast with Uncertainty Interval', yaxis_title='Price (USD)'); st.plotly_chart(fig, use_container_width=True)
-                else: st.warning("Could not generate a forecast. The stock may not have enough historical data.")
+                st.header(f"30-Day Price Forecast for {all_data[0]['ticker']}")
+                if len(all_data) > 1:
+                    st.warning("Price prediction is only available when analyzing a single stock.")
+                else:
+                    with st.spinner("Generating price forecast..."): forecast = get_price_prediction(all_data[0]['hist'])
+                    if forecast is not None:
+                        fig = go.Figure()
+                        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecast', line=dict(color='royalblue', dash='dash')))
+                        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], fill=None, mode='lines', line=dict(color='lightgray'), showlegend=False))
+                        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], fill='tonexty', mode='lines', line=dict(color='lightgray'), name='Uncertainty'))
+                        fig.add_trace(go.Scatter(x=all_data[0]['hist'].index, y=all_data[0]['hist']['Close'], mode='lines', name='Actual Price', line=dict(color='black')))
+                        fig.update_layout(title='Price Forecast with Uncertainty Interval', yaxis_title='Price (USD)'); st.plotly_chart(fig, use_container_width=True)
+                    else: st.warning("Could not generate a forecast. Not enough historical data.")
 else:
-    st.info("Enter a stock and click 'Analyse Stocks' to begin.")
+    st.info("Enter stock(s) and click 'Analyse' to begin.")
