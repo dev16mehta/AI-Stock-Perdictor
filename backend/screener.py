@@ -1,20 +1,22 @@
 import streamlit as st
 import os
 import yfinance as yf
-from finsymbols import S_and_P_500
+import pandas as pd
+import requests
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-import pandas as pd
 
 # --- Helper function to get the stock list ---
 @st.cache_data(ttl=3600) # Cache the list for 1 hour to avoid refetching
 def get_sp500_tickers():
     """Fetches the list of S&P 500 tickers."""
     try:
-        sp500 = S_and_P_500()
-        tickers = sp500.get_stocks()
-        return [stock['symbol'] for stock in tickers]
+        # Using Wikipedia's S&P 500 list
+        url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        tables = pd.read_html(url)
+        df = tables[0]
+        return df['Symbol'].tolist()
     except Exception as e:
         print(f"Error fetching S&P 500 tickers: {e}")
         # Fallback list in case the API fails
@@ -58,8 +60,8 @@ def run_ai_screener(prompt):
     # Step 1: Get the universe of stocks to screen (S&P 500)
     tickers = get_sp500_tickers()
     
-    # For demonstration purposes, let's limit to the first 50 stocks to keep it fast
-    tickers_to_scan = tickers[:50] 
+    # For demonstration purposes, let's limit to the first 200 stocks to keep it fast
+    tickers_to_scan = tickers[:200] 
     
     # Step 2: Get the key financial data for these stocks
     df_stats = get_key_stats(tickers_to_scan)
