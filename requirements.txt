@@ -13,3 +13,4 @@ firebase-admin
 prophet
 pandas-ta
 setuptools
+finsymbols
