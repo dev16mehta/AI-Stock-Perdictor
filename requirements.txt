@@ -6,12 +6,12 @@ vaderSentiment
 langchain
 langchain-groq
 python-dotenv
-pandas
-numpy
+pandas==1.5.3
+numpy==1.26.4
 scikit-learn
 plotly
 firebase-admin
 prophet
-pandas-ta
+pandas-ta==0.3.14b0
 setuptools
 finsymbols
