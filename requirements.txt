@@ -1,3 +1,4 @@
+standard-distutils
 streamlit
 yfinance
 newsapi-python
@@ -5,12 +6,12 @@ vaderSentiment
 langchain
 langchain-groq
 python-dotenv
-# pandas<2.0.0 # Removed as pandas-ta-openbb handles its own pandas/numpy compatibility
-# numpy==1.26.3 # Removed as pandas-ta-openbb handles its own pandas/numpy compatibility
+pandas
+numpy
 scikit-learn
 plotly
 firebase-admin
 prophet
-pandas-ta-openbb # Replaced pandas-ta with the NumPy 2 compatible fork
+pandas-ta
 setuptools
 finsymbols
