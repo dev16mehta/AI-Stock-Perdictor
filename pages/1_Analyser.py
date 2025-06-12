@@ -40,7 +40,6 @@ def normalize_prices(df):
     return (df['Close'] / df['Close'].iloc[0]) * 100
     
 def display_stock_details(container, ticker_data):
-    st.info("Displaying Stock Details (DEBUG)") # NEW DEBUG MESSAGE
     uid = st.session_state.get('uid')
     ticker = ticker_data['ticker']
     is_in_watchlist = ticker in st.session_state.get('watchlist', [])
@@ -236,7 +235,7 @@ if st.session_state.get('analysis_data') and len(st.session_state['analysis_data
     with main_tabs[3]:
         st.header(f"30-Day Price Forecast for {all_data[0]['ticker']}")
         if len(all_data) > 1:
-            st.warning("Price prediction is only available when analyzing a single stock.")
+            st.warning("Price prediction is only available when analysing a single stock.")
         else:
             with st.spinner("Generating price forecast..."): forecast = get_price_prediction(all_data[0]['hist'])
             if forecast is not None:
