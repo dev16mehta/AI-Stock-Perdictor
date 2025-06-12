@@ -5,12 +5,12 @@ vaderSentiment
 langchain
 langchain-groq
 python-dotenv
-pandas
-numpy>=1.24.0
+# pandas<2.0.0 # Removed as pandas-ta-openbb handles its own pandas/numpy compatibility
+# numpy==1.26.3 # Removed as pandas-ta-openbb handles its own pandas/numpy compatibility
 scikit-learn
 plotly
 firebase-admin
 prophet
-pandas-ta
+pandas-ta-openbb # Replaced pandas-ta with the NumPy 2 compatible fork
 setuptools
 finsymbols
