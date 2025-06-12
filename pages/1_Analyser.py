@@ -53,11 +53,30 @@ def display_stock_details(container, ticker_data):
 
     sub_tabs = container.tabs(["📊 Key Metrics", "💬 News Sentiment", "💰 Financials", "📰 Recent News"])
     with sub_tabs[0]:
-        if ticker_data['hist'].empty: st.warning("No historical price data.")
+        if ticker_data['hist'].empty: 
+            st.warning("No historical price data.")
         else:
             c1, c2 = st.columns(2)
             c1.metric("Last Close", f"${ticker_data['hist']['Close'].iloc[-1]:,.2f}")
             c2.metric("Market Cap", f"${ticker_data['info'].info.get('marketCap', 0) / 1e9:,.2f}B")
+        st.divider()
+
+        # --- NEW: "Add to Portfolio" Form ---
+        st.subheader("Add to Portfolio")
+        with st.form(key=f"add_portfolio_{ticker_data['ticker']}"):
+            shares = st.number_input("Number of Shares", min_value=0.0, format="%.4f")
+            purchase_price = st.number_input("Purchase Price per Share", min_value=0.0, format="%.2f")
+            
+            submitted = st.form_submit_button("Add Holding")
+            if submitted:
+                if shares > 0 and purchase_price > 0:
+                    uid = st.session_state.get('uid')
+                    if add_to_portfolio(uid, ticker_data['ticker'], shares, purchase_price):
+                        st.success(f"Successfully added {shares} shares of {ticker_data['ticker']} to your portfolio!")
+                    else:
+                        st.error("Failed to add holding to portfolio.")
+                else:
+                    st.warning("Please enter a valid number of shares and purchase price.")
     with sub_tabs[1]:
         st.metric("Sentiment Score", f"{ticker_data['sentiment']:.2f}")
     with sub_tabs[2]:
