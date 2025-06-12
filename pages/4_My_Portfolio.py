@@ -20,7 +20,9 @@ st.divider()
 
 # --- State & Data Loading ---
 uid = st.session_state.get('uid')
+# st.write(f"UID: {uid}")  # DEBUG: Show the current user ID
 portfolio_holdings = get_portfolio(uid)
+# st.write(portfolio_holdings)  # DEBUG: Show the raw portfolio holdings
 
 # --- Display Portfolio ---
 if not portfolio_holdings:

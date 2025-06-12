@@ -1,6 +1,7 @@
 import yfinance as yf
 from firebase_admin import firestore
 import pandas as pd
+import streamlit as st
 
 db = firestore.client()
 
