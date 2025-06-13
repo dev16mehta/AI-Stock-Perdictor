@@ -32,7 +32,7 @@
 Follow these instructions to set up and run the project on your local machine!
 
 Prerequisites:
-1. Python 3.8 or higher
+1. Python 3.8 or higher (Used 3.10 for this project)
 2. Git
 
 Steps:
