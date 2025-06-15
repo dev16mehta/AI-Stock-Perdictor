@@ -3,41 +3,49 @@ import pandas_ta as ta
 
 def add_technical_indicators(df):
     """
-    Calculates and adds a comprehensive set of technical indicators 
-    to the historical data DataFrame using the pandas-ta library.
+    Calculate and add technical indicators to stock price data.
+    
+    This function adds several popular technical indicators to the DataFrame:
+    - Simple Moving Averages (20 and 50 periods)
+    - Exponential Moving Average (20 periods)
+    - Bollinger Bands (20 periods, 2 standard deviations)
+    - Relative Strength Index (14 periods)
+    - MACD (12, 26, 9)
+    - On-Balance Volume
     
     Args:
-        df (pd.DataFrame): The stock's historical price data. 
-                           It must have 'Open', 'High', 'Low', 'Close', 'Volume' columns.
+        df (pd.DataFrame): Historical price data with columns:
+            - Open: Opening prices
+            - High: Highest prices
+            - Low: Lowest prices
+            - Close: Closing prices
+            - Volume: Trading volume
         
     Returns:
-        pd.DataFrame: The original DataFrame with new columns for each indicator.
+        pd.DataFrame: Original DataFrame with additional indicator columns
     """
     if df.empty:
         return df
         
-    # Simple Moving Averages (SMA)
+    # Calculate trend-following indicators
     df['SMA_20'] = ta.sma(df['Close'], length=20)
     df['SMA_50'] = ta.sma(df['Close'], length=50)
-    
-    # Exponential Moving Average (EMA)
     df['EMA_20'] = ta.ema(df['Close'], length=20)
     
-    # Bollinger Bands
+    # Calculate volatility indicators
     bollinger = ta.bbands(df['Close'], length=20)
     if bollinger is not None and not bollinger.empty:
         df = df.join(bollinger)
 
-    # Relative Strength Index (RSI)
+    # Calculate momentum indicators
     df['RSI_14'] = ta.rsi(df['Close'], length=14)
     
-    # Moving Average Convergence Divergence (MACD)
+    # Calculate trend and momentum crossover indicator
     macd = ta.macd(df['Close'])
     if macd is not None and not macd.empty:
-        # Join the MACD line, signal line, and histogram
         df = df.join(macd)
 
-    # On-Balance Volume (OBV)
+    # Calculate volume-based indicator
     df['OBV'] = ta.obv(df['Close'], df['Volume'])
     
     return df

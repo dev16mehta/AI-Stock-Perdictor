@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import sys
 import os
 
-# --- Authentication Guard & Path Setup ---
+# Authentication check and path setup
 if not st.session_state.get("logged_in", False):
     st.error("You need to log in to access this page.")
     st.stop()
@@ -19,27 +19,29 @@ from backend.predictor import get_price_prediction
 from backend.technical_analyzer import add_technical_indicators
 from backend.portfolio_manager import add_to_portfolio
 
-# --- Page Configuration ---
+# Configure Streamlit page settings
 st.set_page_config(page_title="QuantView AI Analyser", page_icon="📈", layout="wide")
 
-# --- Callback & Helper Functions (These all remain the same) ---
 def handle_add(uid, ticker):
+    """Add a stock to the user's watchlist."""
     add_to_watchlist(uid, ticker)
     if 'watchlist' in st.session_state and ticker not in st.session_state.watchlist:
         st.session_state.watchlist.append(ticker)
     st.toast(f"Added {ticker} to your watchlist!", icon="⭐")
 
 def handle_remove(uid, ticker):
+    """Remove a stock from the user's watchlist."""
     remove_from_watchlist(uid, ticker)
     if 'watchlist' in st.session_state and ticker in st.session_state.watchlist:
         st.session_state.watchlist.remove(ticker)
     st.toast(f"Removed {ticker} from your watchlist.", icon="🗑️")
 
 def normalize_prices(df):
-    """Normalizes the 'Close' price of a dataframe to start at 100."""
+    """Normalize stock prices to start at 100 for comparison."""
     return (df['Close'] / df['Close'].iloc[0]) * 100
     
 def display_stock_details(container, ticker_data):
+    """Display detailed stock information including metrics, news, and portfolio options."""
     uid = st.session_state.get('uid')
     ticker = ticker_data['ticker']
     is_in_watchlist = ticker in st.session_state.get('watchlist', [])
@@ -62,7 +64,7 @@ def display_stock_details(container, ticker_data):
             c2.metric("Market Cap", f"${ticker_data['info'].info.get('marketCap', 0) / 1e9:,.2f}B")
         st.divider()
 
-        # --- NEW: "Add to Portfolio" Form ---
+        # Portfolio management form
         st.subheader("Add to Portfolio")
         with st.form(key=f"add_portfolio_{ticker_data['ticker']}"):
             shares = st.number_input("Number of Shares", min_value=0.0, format="%.4f")
@@ -74,7 +76,7 @@ def display_stock_details(container, ticker_data):
                     uid = st.session_state.get('uid')
                     if add_to_portfolio(uid, ticker_data['ticker'], shares, purchase_price):
                         st.success(f"Successfully added {shares} shares of {ticker_data['ticker']} to your portfolio!")
-                        st.rerun() # Rerun to refresh portfolio immediately
+                        st.rerun()
                     else:
                         st.error("Failed to add holding to portfolio.")
                 else:
@@ -92,11 +94,11 @@ def display_stock_details(container, ticker_data):
                     st.write(f"**{article['title']}**"); st.write(f"_{article.get('source', {}).get('name', 'Unknown Source')} - {pd.to_datetime(article.get('publishedAt')).strftime('%Y-%m-%d')}_")
                     st.markdown(f"[Read]({article.get('url')})", unsafe_allow_html=True); st.divider()
 
-# --- Main App UI ---
+# Main application header
 st.markdown(f" # QuantView AI \n *Welcome, {st.session_state.get('email', 'Investor')}!*")
 st.divider()
 
-# --- Sidebar ---
+# Sidebar configuration
 with st.sidebar:
     st.header("Stock Selection")
     tickers_input = st.text_input("Enter stock(s) (e.g., AAPL,MSFT)", "TSLA").upper()
@@ -104,7 +106,7 @@ with st.sidebar:
     st.header("AI Analysis Level")
     investor_level = st.selectbox("Choose your investor profile:", ("Beginner", "Advanced"))
 
-    # --- ADVANCED MODE LOGIC: Only show these options if the user is 'Advanced' ---
+    # Advanced mode options
     selected_indicators = []
     if investor_level == "Advanced":
         st.header("Chart Options")
@@ -122,28 +124,24 @@ with st.sidebar:
     
     analyze_button = st.button("Analyse Stock(s)", type="primary")
 
-# --- Main Content Logic ---
+# Main content logic
 if analyze_button:
     if start_date >= end_date:
         st.warning("The start date must be before the end date.")
-        st.session_state['analysis_data'] = [] # Clear data if dates are invalid
+        st.session_state['analysis_data'] = []
     else:
         st.session_state.watchlist = get_watchlist(st.session_state.get('uid'))
         tickers = [ticker.strip() for ticker in tickers_input.split(',') if ticker.strip()]
         
         if not tickers:
             st.warning("Please enter at least one valid stock ticker.")
-            st.session_state['analysis_data'] = [] # Clear data if no tickers
+            st.session_state['analysis_data'] = []
         else:
             all_data = []
             with st.spinner(f"Fetching and analysing {', '.join(tickers)}..."):
                 for ticker in tickers:
                     stock_info, stock_hist = get_stock_data(ticker, start_date, end_date)
                     if stock_info:
-                        # --- ADVANCED MODE LOGIC: Removed calculation here, now done before plotting ---
-                        # if investor_level == "Advanced":
-                        #     stock_hist = add_technical_indicators(stock_hist.copy())
-                        
                         news = get_financial_news(ticker)
                         all_data.append({
                             "ticker": ticker, "info": stock_info, 
@@ -154,28 +152,25 @@ if analyze_button:
                     else:
                         st.error(f"Could not retrieve data for {ticker}.")
             
-            st.session_state['analysis_data'] = all_data # Store fetched data
+            st.session_state['analysis_data'] = all_data
 
-# Now, always display tabs if analysis_data exists
+# Display analysis results
 if st.session_state.get('analysis_data') and len(st.session_state['analysis_data']) > 0:
-    all_data = st.session_state['analysis_data'] # Retrieve data
+    all_data = st.session_state['analysis_data']
     
-    # --- Tab Creation ---
     tab_list = ["Chart", "AI Insights", "Detailed Analysis", "Price Prediction"]
     main_tabs = st.tabs(tab_list)
 
     with main_tabs[0]: # Chart Tab
-        # --- ADVANCED MODE LOGIC: Show different charts based on user level ---
         if investor_level == "Advanced":
             st.header(f"Advanced Chart for {all_data[0]['ticker']}")
-            stock_df = all_data[0]['hist'].copy() # Use a copy to avoid modifying original session state data
+            stock_df = all_data[0]['hist'].copy()
             if not stock_df.empty:
-                # Calculate technical indicators here, right before plotting
                 stock_df = add_technical_indicators(stock_df)
                 fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.6, 0.2, 0.2])
                 fig.add_trace(go.Candlestick(x=stock_df.index, open=stock_df['Open'], high=stock_df['High'],low=stock_df['Low'], close=stock_df['Close'], name='Price'), row=1, col=1)
 
-                # Plot selected indicators on the main chart
+                # Plot selected technical indicators
                 if "SMA 20" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_20'], mode='lines', name='SMA 20', line=dict(width=1)), row=1, col=1)
                 if "SMA 50" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_50'], mode='lines', name='SMA 50', line=dict(width=1)), row=1, col=1)
                 if "EMA 20" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['EMA_20'], mode='lines', name='EMA 20', line=dict(width=1, dash='dash')), row=1, col=1)
@@ -215,7 +210,6 @@ if st.session_state.get('analysis_data') and len(st.session_state['analysis_data
                 st.info("No data to plot.")
 
     with main_tabs[1]:
-        # This logic remains the same, but now works with multiple stocks for beginners
         if len(all_data) > 1:
             st.info("AI Insights below compare the first two selected stocks.")
             ai_comp = get_ai_comparison(all_data[0], all_data[1], investor_level)

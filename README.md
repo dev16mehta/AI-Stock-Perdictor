@@ -1,15 +1,15 @@
 # QuantView AI
 
 - An interactive web application that combines real-time market data, financial news sentiment, and generative AI to deliver comprehensive stock insights. 
-- This tool is designed for both beginner and advanced investors, offering side-by-side stock comparisons and customizable analysis.
+- This tool is designed for both beginner and advanced investors, offering side-by-side stock comparisons and customisable analysis.
 
 
 ## Core Features
 - Real-Time Data: Pulls live market data, historical prices, and company financials using the yFinance library.
 
-- Side-by-Side Comparison: Analyze two stocks simultaneously to compare performance, sentiment, and key metrics.
+- Side-by-Side Comparison: Analyse two stocks simultaneously to compare performance, sentiment, and key metrics.
 
-- Sentiment Analysis: Fetches the latest financial news from NewsAPI and analyzes its sentiment using VADER to generate a positive/negative score.
+- Sentiment Analysis: Fetches the latest financial news from NewsAPI and analyses its sentiment using VADER to generate a positive/negative score.
 
 - AI-Generated Insights: Leverages the Groq API with Llama 3 via LangChain to generate:
 
@@ -97,7 +97,7 @@ A new tab should automatically open in your web browser at http://localhost:8501
 - Select Dates: Choose the start and end dates for the historical data analysis.
 - Choose Profile: Select your investor profile ("Beginner" or "Advanced") to tailor the AI-generated summaries to your needs.
 - Analyse: Click the "Analyse Stocks" button.
-- Explore: View the normalized performance chart, read the AI insights, and explore the side-by-side comparison of metrics, news, and financials.
+- Explore: View the normalised performance chart, read the AI insights, and explore the side-by-side comparison of metrics, news, and financials.
 
 Pro Tip for International Stocks: For stocks outside the US, you may need to add a market suffix. For example:
 Barclays (London): BARC.L
@@ -107,7 +107,7 @@ Reliance (India): RELIANCE.NS
 App Pages
 - Analyser: The main analysis page. View advanced charts, AI insights, detailed financials, and price predictions. Add stocks to your watchlist or portfolio from here.
 
-- My Watchlist: A personalized dashboard to monitor stocks you are interested in.
+- My Watchlist: A personalised dashboard to monitor stocks you are interested in.
 
 - AI Screener: Use natural language to discover new investment opportunities.
 
