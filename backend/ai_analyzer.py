@@ -6,7 +6,10 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
 def analyze_sentiment(articles):
-    """Analyzes sentiment of news articles using VADER."""
+    """
+    Analyze sentiment of news articles using VADER sentiment analysis.
+    Returns a compound sentiment score between -1 (negative) and 1 (positive).
+    """
     analyzer = SentimentIntensityAnalyzer()
     sentiment_scores = []
     if not articles:
@@ -22,14 +25,17 @@ def analyze_sentiment(articles):
     return sum(sentiment_scores) / len(sentiment_scores)
 
 def get_ai_summary(articles, ticker, investor_level="Beginner"):
-    """Generates a summary and insights for a single stock."""
+    """
+    Generate an AI-powered summary of news articles for a stock.
+    Adapts the analysis depth based on the investor's experience level.
+    """
     if not articles:
         return "No news available to generate a summary."
     news_text = " ".join([f"{article['title']}. {article['description']}" for article in articles if article and article.get('title') and article.get('description')])
     if not news_text:
         return "Not enough news content to generate a summary."
 
-    # Check for secrets first, then fall back to environment variables
+    # Get API key from Streamlit secrets or environment variables
     if 'GROQ_API_KEY' in st.secrets:
         api_key = st.secrets['GROQ_API_KEY']
     else:
@@ -40,6 +46,7 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
 
     llm = ChatGroq(temperature=0, model_name="llama3-70b-8192", api_key=api_key)
 
+    # Customize prompt based on investor experience level
     if investor_level == "Beginner":
         template = """You are a friendly financial assistant. Based on the following news about {ticker}, provide a simple, easy-to-understand summary for a complete beginner. Explain if the news sounds generally positive or negative and why, avoiding complex jargon. News Articles: "{news_text}" Your simple summary:"""
     else:
@@ -55,7 +62,10 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
         return f"Error generating AI summary: {e}"
 
 def get_ai_comparison(data1, data2, investor_level="Beginner"):
-    """Generates a comparative analysis of two stocks."""
+    """
+    Generate a comparative analysis of two stocks based on their news.
+    Adapts the analysis depth based on the investor's experience level.
+    """
     ticker1, news1 = data1['ticker'], data1['news']
     ticker2, news2 = data2['ticker'], data2['news']
     news_text1 = " ".join([f"{a['title']}" for a in news1[:5] if a and a.get('title')])
@@ -64,7 +74,7 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
     if not news_text1 and not news_text2:
         return "Not enough news content for either stock to generate a comparison."
     
-    # Check for secrets first, then fall back to environment variables
+    # Get API key from Streamlit secrets or environment variables
     if 'GROQ_API_KEY' in st.secrets:
         api_key = st.secrets['GROQ_API_KEY']
     else:
@@ -75,6 +85,7 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
 
     llm = ChatGroq(temperature=0.1, model_name="llama3-70b-8192", api_key=api_key)
 
+    # Customize prompt based on investor experience level
     if investor_level == "Beginner":
         template = """You are a helpful financial guide. Compare two stocks, {ticker1} and {ticker2}, for a beginner. Based on their latest news, explain which one seems to have more positive news and why. Keep it simple. News for {ticker1}: "{news_text1}" News for {ticker2}: "{news_text2}" Your simple comparison:"""
     else:

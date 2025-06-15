@@ -6,11 +6,22 @@ import streamlit as st
 db = firestore.client()
 
 def add_to_portfolio(uid, ticker, shares, purchase_price):
-    """Adds a holding to the user's portfolio in Firestore."""
+    """
+    Add a stock holding to the user's portfolio in Firestore.
+    
+    Args:
+        uid (str): User's unique identifier
+        ticker (str): Stock symbol
+        shares (float): Number of shares purchased
+        purchase_price (float): Price per share at purchase
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
     if not all([uid, ticker, shares, purchase_price]):
         return False
     try:
-        # We can store multiple lots of the same stock, so we use add() to get a unique ID.
+        # Create a new document with auto-generated ID for each lot
         portfolio_ref = db.collection('users').document(uid).collection('portfolio')
         portfolio_ref.add({
             'ticker': ticker,
@@ -25,7 +36,15 @@ def add_to_portfolio(uid, ticker, shares, purchase_price):
         return False
 
 def get_portfolio(uid):
-    """Retrieves all holdings for a given user ID."""
+    """
+    Retrieve all stock holdings for a user from Firestore.
+    
+    Args:
+        uid (str): User's unique identifier
+        
+    Returns:
+        list: List of dictionaries containing holding information
+    """
     if not uid:
         return []
     try:
@@ -34,7 +53,7 @@ def get_portfolio(uid):
         portfolio = []
         for doc in docs:
             holding = doc.to_dict()
-            holding['id'] = doc.id # Keep the document ID for deletion
+            holding['id'] = doc.id  # Store document ID for future operations
             portfolio.append(holding)
         return portfolio
     except Exception as e:
@@ -42,7 +61,16 @@ def get_portfolio(uid):
         return []
 
 def remove_from_portfolio(uid, holding_id):
-    """Removes a specific holding from the user's portfolio."""
+    """
+    Remove a specific stock holding from the user's portfolio.
+    
+    Args:
+        uid (str): User's unique identifier
+        holding_id (str): Document ID of the holding to remove
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
     if not uid or not holding_id:
         return False
     try:
@@ -54,17 +82,25 @@ def remove_from_portfolio(uid, holding_id):
         print(f"Error removing from portfolio: {e}")
         return False
 
-@st.cache_data(ttl=300) # Cache live prices for 5 minutes
+@st.cache_data(ttl=300)  # Cache market prices for 5 minutes to reduce API calls
 def get_live_prices(tickers):
-    """Gets the current market price for a list of tickers."""
+    """
+    Fetch current market prices for a list of stock symbols.
+    
+    Args:
+        tickers (list): List of stock symbols to fetch prices for
+        
+    Returns:
+        dict: Dictionary mapping ticker symbols to their current prices
+    """
     if not tickers:
         return {}
     
-    # yfinance can take a space-separated string of tickers
+    # Download latest price data for all tickers
     data = yf.download(tickers=' '.join(tickers), period='1d', progress=False)
     if data.empty:
         return {}
     
-    # Get the most recent closing price for each ticker
+    # Extract most recent closing prices
     prices = data['Close'].iloc[-1].to_dict()
     return prices
