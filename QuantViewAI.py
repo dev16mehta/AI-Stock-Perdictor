@@ -4,23 +4,20 @@ from firebase_admin import credentials, auth
 import re
 import time
 
-# --- Page Configuration ---
+# Configure Streamlit page settings
 st.set_page_config(
     page_title="Login | QuantView AI", 
     page_icon="🔐",
     layout="centered"
 )
 
-# --- Firebase Initialization ---
-# Initialize only once
+# Initialise Firebase Admin SDK
 if not firebase_admin._apps:
     try:
-        # Check if we are in a deployed environment (Streamlit Cloud)
+        # Handle both local development and deployed environments
         if 'firebase_service_account' in st.secrets:
-            # Use the secrets from Streamlit Cloud
             cred_dict = dict(st.secrets["firebase_service_account"])
         else:
-            # Use the local file for local development
             cred_dict = "firebase_service_account.json"
         
         cred = credentials.Certificate(cred_dict)
@@ -29,7 +26,7 @@ if not firebase_admin._apps:
         st.error(f"Firebase initialization failed. Ensure your secrets are configured correctly. Error: {e}")
         st.stop()
 
-# --- Session State Initialization ---
+# Initialise session state variables
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 if 'page' not in st.session_state:
@@ -39,7 +36,7 @@ if 'email' not in st.session_state:
 if 'uid' not in st.session_state:
     st.session_state['uid'] = ''
 
-# --- UI Styling ---
+# Custom CSS for improved UI layout and styling
 st.markdown("""
 <style>
     /* Center the main content */
@@ -59,18 +56,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Helper Functions ---
 def is_valid_email(email):
-    """Simple regex for email validation."""
+    """Validate email format using regex pattern."""
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-# --- Page Routing ---
 def navigate_to(page):
+    """Update the current page in session state and trigger a rerun."""
     st.session_state.page = page
     st.rerun()
 
-# --- Login Page UI ---
 def page_login():
+    """Render the login page with email and password inputs."""
     st.title("🔐 QuantView AI")
     
     with st.container(border=True):
@@ -87,7 +83,7 @@ def page_login():
                         print(f"Attempting to login user: {email}")
                         user = auth.get_user_by_email(email)
                         print(f"User found with UID: {user.uid}")
-                        # Password check is simplified for this demo.
+                        # Note: Password verification is simplified for demo purposes
                         st.session_state['logged_in'] = True
                         st.session_state['email'] = user.email
                         st.session_state['uid'] = user.uid
@@ -105,8 +101,8 @@ def page_login():
             if st.button("Sign Up Instead", use_container_width=True):
                 navigate_to('signup')
 
-# --- Signup Page UI ---
 def page_signup():
+    """Render the signup page with email and password registration form."""
     st.title("👋 Create Your Account")
     with st.container(border=True):
         email = st.text_input("Email", key="signup_email")
@@ -129,7 +125,7 @@ def page_signup():
         if st.button("Back to Login", use_container_width=True):
             navigate_to('login')
 
-# --- Main Logic ---
+# Main application routing logic
 if st.session_state.get('logged_in', False):
     st.switch_page("pages/1_Analyser.py")
 else:
@@ -138,4 +134,4 @@ else:
     elif st.session_state.page == 'signup':
         page_signup()
     else:
-        page_login() # Default to login
+        page_login() # Default to login page
