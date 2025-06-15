@@ -87,7 +87,7 @@ Note: The .gitignore file is already configured to prevent this file from being 
 ## How to Run the App
 With your environment activated and API keys in place, start the Streamlit server with a single command:
 ```bash
-streamlit run app.py
+streamlit run QuantViewAI.py
 ```
 
 A new tab should automatically open in your web browser at http://localhost:8501.
@@ -104,9 +104,14 @@ Barclays (London): BARC.L
 Volkswagen (Germany): VOW3.DE
 Reliance (India): RELIANCE.NS
 
-## Future Developments
-- The next major feature planned is the integration of machine learning models for price prediction:
-    Time-Series Forecasting: Implement models like ARIMA or Prophet to generate short-term price predictions and visualize them on the chart.
+App Pages
+- Analyser: The main analysis page. View advanced charts, AI insights, detailed financials, and price predictions. Add stocks to your watchlist or portfolio from here.
+
+- My Watchlist: A personalized dashboard to monitor stocks you are interested in.
+
+- AI Screener: Use natural language to discover new investment opportunities.
+
+- My Portfolio: Track your personal stock holdings, including cost basis and real-time profit/loss.
 
 ## License
 This project is licensed under the MIT License. [MIT](https://choosealicense.com/licenses/mit/)
