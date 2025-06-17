@@ -99,3 +99,49 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
         return response.get('text', "AI comparison could not be generated.")
     except Exception as e:
         return f"Error generating AI comparison: {e}"
+
+# --- FUNCTION FOR PORTFOLIO HEALTH REPORT ---
+def get_ai_portfolio_analysis(report_data_string):
+    """
+    Generates an AI-powered analysis of a user's playground portfolio.
+    
+    Args:
+        report_data_string (str): A string containing all the calculated metrics for the portfolio.
+        
+    Returns:
+        str: A markdown-formatted string with the AI's analysis and recommendations.
+    """
+    if 'GROQ_API_KEY' in st.secrets:
+        api_key = st.secrets['GROQ_API_KEY']
+    else:
+        api_key = os.getenv("GROQ_API_KEY")
+
+    if not api_key:
+        return "Error: GROQ_API_KEY not found."
+
+    llm = ChatGroq(temperature=0.2, model_name="llama3-70b-8192", api_key=api_key)
+    
+    template = """
+    You are an encouraging and insightful financial analyst reviewing a user's virtual stock portfolio.
+    Your tone should be positive and educational.
+    Based on the following data, provide a concise "Portfolio Health Report".
+
+    The report should have three sections in markdown format:
+    1.  **Overall Summary:** A brief, 2-3 sentence summary of the portfolio's current state.
+    2.  **Key Observations:** 2-3 bullet points highlighting the most important findings (e.g., strong diversification, high risk in one stock, positive news sentiment).
+    3.  **Actionable Recommendations:** 2 bullet points with suggestions for the user to consider. Frame these as educational tips, not direct financial advice.
+
+    Here is the data:
+    {report_data}
+
+    Your AI-Generated Report:
+    """
+
+    prompt = PromptTemplate(template=template, input_variables=["report_data"])
+    llm_chain = LLMChain(prompt=prompt, llm=llm)
+
+    try:
+        response = llm_chain.invoke({"report_data": report_data_string})
+        return response.get('text', "AI analysis could not be generated.")
+    except Exception as e:
+        return f"Error generating AI analysis: {e}"
