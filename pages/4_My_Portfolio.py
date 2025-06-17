@@ -2,7 +2,6 @@ import streamlit as st
 import sys
 import os
 import pandas as pd
-import time # Import time for logout sequence
 
 # --- Authentication Guard & Path Setup ---
 if not st.session_state.get("logged_in", False):
@@ -15,21 +14,12 @@ from backend.portfolio_manager import get_portfolio, get_live_prices, remove_fro
 # --- Page Configuration ---
 st.set_page_config(page_title="My Portfolio", page_icon="💼", layout="wide")
 
-# --- NEW: Logout Function ---
-def logout():
-    st.session_state.logged_in = False
-    st.session_state.email = ""
-    st.session_state.uid = ""
-    st.success("You have been successfully logged out!")
-    time.sleep(1.5)
-    st.switch_page("landing.py")
-
-# --- NEW: Sidebar with Logout Button ---
+# --- Sidebar with Logout Button ---
 with st.sidebar:
     st.title("Account")
     st.write(f"Logged in as: {st.session_state.get('email')}")
     st.divider()
-    st.button("Logout", key="logout_portfolio", on_click=logout, use_container_width=True)
+    st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
 
 st.markdown(f" # My Portfolio")
 st.caption("Track the value and performance of your stock holdings.")

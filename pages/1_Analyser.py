@@ -5,7 +5,6 @@ from plotly.subplots import make_subplots
 from datetime import date, timedelta
 import sys
 import os
-import time # Import time for logout sequence
 
 # --- Authentication Guard & Path Setup ---
 if not st.session_state.get("logged_in", False):
@@ -22,15 +21,6 @@ from backend.portfolio_manager import add_to_portfolio
 
 # --- Page Configuration ---
 st.set_page_config(page_title="QuantView AI Analyser", page_icon="📈", layout="wide")
-
-# --- NEW: Logout Function ---
-def logout():
-    st.session_state.logged_in = False
-    st.session_state.email = ""
-    st.session_state.uid = ""
-    st.success("You have been successfully logged out!")
-    time.sleep(1.5)
-    st.switch_page("landing.py")
 
 def handle_add(uid, ticker):
     """Add a stock to the user's watchlist."""
@@ -132,9 +122,9 @@ with st.sidebar:
     
     analyze_button = st.button("Analyse Stock(s)", type="primary")
 
-    # --- NEW: Logout Button ---
+    # --- UPDATED LOGOUT ---
     st.divider()
-    st.button("Logout", key="logout_analyser", on_click=logout, use_container_width=True)
+    st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
 
 
 # --- Main content logic ---
