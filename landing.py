@@ -64,6 +64,18 @@ SVG_ICONS = {
     """
 }
 
+# --- NEW: Top Right Login Button ---
+# This uses a styled link to navigate to the Login page.
+st.markdown(
+    """
+    <div class="top-right-nav">
+        <a href="/Login" target="_self" class="login-button">Login</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # --- Background ---
 st.markdown(
     """

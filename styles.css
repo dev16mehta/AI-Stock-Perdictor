@@ -1,5 +1,29 @@
+/* --- NEW: Top Right Login Button --- */
+.top-right-nav {
+    position: fixed;
+    top: 1.5rem;
+    right: 2.5rem;
+    z-index: 100;
+}
+
+a.login-button {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+a.login-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
 /* --- HIDE THE FULLSCREEN BUTTON ON THE IMAGE --- */
-/* This rule targets the toolbar Streamlit adds to images and hides it. */
 [data-testid="stImageToolbar"] {
     display: none !important;
 }
@@ -106,7 +130,7 @@ section.main > div {
 }
 
 
-/* --- Features Section (Perfect, as requested) --- */
+/* --- Features Section --- */
 .features-title { text-align: center; font-size: 2.5rem; margin-top: 5rem; margin-bottom: 3rem; }
 .feature-card { background: rgba(14, 17, 23, 0.7); backdrop-filter: blur(10px); border: 1px solid #222933; border-radius: 16px; padding: 2rem; height: 250px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
 .feature-card:hover { transform: translateY(-8px); border-color: #ff416c; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
