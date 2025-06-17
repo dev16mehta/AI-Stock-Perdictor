@@ -100,8 +100,7 @@ with st.container():
             """,
             unsafe_allow_html=True
         )
-        # --- FIXED LINE ---
-        st.image("assets/hero-image1.png", use_container_width=True) 
+        st.image("assets/hero-image1.png", use_container_width=True)
         st.markdown(
             """
             </div>
