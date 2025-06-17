@@ -19,6 +19,13 @@ def load_css(file_path):
 css = load_css("styles.css")
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
+# --- NEW: Display Logout Message if applicable ---
+if st.session_state.get('just_logged_out', False):
+    st.toast("You have been successfully logged out!", icon="👋")
+    # Reset the flag so it doesn't show again on refresh
+    st.session_state.just_logged_out = False
+
+
 # --- SVG Icons ---
 SVG_ICONS = {
     "analysis": """
@@ -64,8 +71,7 @@ SVG_ICONS = {
     """
 }
 
-# --- NEW: Top Right Login Button ---
-# This uses a styled link to navigate to the Login page.
+# --- Top Right Login Button ---
 st.markdown(
     """
     <div class="top-right-nav">
@@ -74,7 +80,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 # --- Background ---
 st.markdown(
@@ -88,7 +93,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- Two-Column Hero Layout ---
+# --- Hero Section Wrapper for Centering ---
+st.markdown('<div class="hero-wrapper">', unsafe_allow_html=True)
 with st.container():
     col1, col2 = st.columns(spec=[1.2, 1], gap="large")
 
@@ -119,6 +125,7 @@ with st.container():
             """,
             unsafe_allow_html=True
         )
+st.markdown('</div>', unsafe_allow_html=True) # Close hero-wrapper
 
 st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
 

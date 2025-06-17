@@ -14,35 +14,35 @@ from backend.portfolio_manager import get_portfolio, get_live_prices, remove_fro
 # --- Page Configuration ---
 st.set_page_config(page_title="My Portfolio", page_icon="💼", layout="wide")
 
+# --- Sidebar with Logout Button ---
+with st.sidebar:
+    st.title("Account")
+    st.write(f"Logged in as: {st.session_state.get('email')}")
+    st.divider()
+    st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
+
 st.markdown(f" # My Portfolio")
 st.caption("Track the value and performance of your stock holdings.")
 st.divider()
 
 # --- State & Data Loading ---
 uid = st.session_state.get('uid')
-# st.write(f"UID: {uid}")  # DEBUG: Show the current user ID
 portfolio_holdings = get_portfolio(uid)
-# st.write(portfolio_holdings)  # DEBUG: Show the raw portfolio holdings
 
 # --- Display Portfolio ---
 if not portfolio_holdings:
     st.info("Your portfolio is empty. Add holdings from the 'Detailed Analysis' tab on the Analyser page.")
 else:
-    # --- Create DataFrame from holdings ---
     df = pd.DataFrame(portfolio_holdings)
-    
-    # --- Get live prices for all tickers in the portfolio ---
     unique_tickers = df['ticker'].unique().tolist()
     with st.spinner("Fetching live market prices..."):
         live_prices = get_live_prices(unique_tickers)
 
-    # --- Calculations ---
     df['Current Price'] = df['ticker'].map(live_prices).fillna(0)
     df['Cost Basis'] = df['shares'] * df['purchase_price']
     df['Market Value'] = df['shares'] * df['Current Price']
     df['P/L'] = df['Market Value'] - df['Cost Basis']
     
-    # --- Display Summary Metrics ---
     total_market_value = df['Market Value'].sum()
     total_cost_basis = df['Cost Basis'].sum()
     total_pl = df['P/L'].sum()
@@ -56,10 +56,8 @@ else:
     col3.metric("Total Profit/Loss", f"${total_pl:,.2f}", delta_color=pl_color)
     st.divider()
 
-    # --- Display Holdings Table ---
     st.header("Your Holdings")
     
-    # Format the DataFrame for display
     df_display = df[['ticker', 'shares', 'purchase_price', 'Cost Basis', 'Current Price', 'Market Value', 'P/L']].copy()
     df_display.rename(columns={'ticker': 'Ticker', 'shares': 'Shares', 'purchase_price': 'Avg. Purchase Price'}, inplace=True)
     
@@ -75,7 +73,6 @@ else:
         }
     )
 
-    # --- Section to Remove Holdings ---
     st.subheader("Manage Holdings")
     selected_holding_id = st.selectbox(
         "Select a holding to remove:", 
@@ -92,4 +89,3 @@ else:
                 st.rerun()
             else:
                 st.error("Failed to remove holding.")
-

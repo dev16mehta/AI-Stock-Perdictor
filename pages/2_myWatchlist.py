@@ -14,6 +14,14 @@ from backend.data_handler import get_watchlist, get_stock_data, remove_from_watc
 # --- Page Configuration ---
 st.set_page_config(page_title="My Watchlist", page_icon="⭐", layout="wide")
 
+# --- Sidebar with Logout Button ---
+with st.sidebar:
+    st.title("Account")
+    st.write(f"Logged in as: {st.session_state.get('email')}")
+    st.divider()
+    st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
+
+
 st.markdown(f"""
     # ⭐ My Watchlist
     *Welcome back, {st.session_state.get('email', 'Investor')}!*
@@ -32,7 +40,6 @@ def handle_remove(uid, ticker):
 
 # --- Data Loading ---
 uid = st.session_state.get('uid')
-# Use session state to store watchlist to prevent re-fetching on every interaction
 if 'watchlist' not in st.session_state:
     st.session_state.watchlist = get_watchlist(uid)
 

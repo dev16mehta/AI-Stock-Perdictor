@@ -14,6 +14,13 @@ from backend.screener import run_ai_screener
 # --- Page Configuration ---
 st.set_page_config(page_title="AI Stock Screener", page_icon="🤖", layout="wide")
 
+# --- Sidebar with Logout Button ---
+with st.sidebar:
+    st.title("Account")
+    st.write(f"Logged in as: {st.session_state.get('email')}")
+    st.divider()
+    st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
+
 st.markdown(f" # AI Stock Screener")
 st.caption("Use plain simple english to find stocks based on fundamental criteria!")
 st.divider()
@@ -39,4 +46,3 @@ if st.button("Screen Stocks", type="primary"):
             st.warning("No stocks in the S&P 500 sample matched your criteria.")
     else:
         st.warning("Please enter your criteria in the text box above.")
-
