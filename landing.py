@@ -80,34 +80,40 @@ st.markdown(
 )
 
 with st.container():
-    st.markdown('<div class="hero-section">', unsafe_allow_html=True)
-    
     st.markdown(
-        "<h1 class='hero-title'>Navigate the Market with AI-Powered Clarity</h1>", 
+        """
+        <div class="hero-section">
+            <div class="hero-content-wrapper">
+                <h1 class='hero-title'>Navigate the Market with AI-Powered Clarity</h1>
+                <p class='hero-subtitle'>QuantView AI combines real-time data, news sentiment, and advanced AI to give you a complete picture of the stocks you care about. Move beyond the noise and make data-driven decisions.</p>
+        """,
         unsafe_allow_html=True
     )
+    
+    # --- START: Image with Morph Transition Container ---
+    st.markdown('<div class="hero-image-container">', unsafe_allow_html=True)
+    st.image("assets/hero-image1.png", use_column_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    # --- END: Image with Morph Transition Container ---
+    
     st.markdown(
-        "<p class='hero-subtitle'>QuantView AI combines real-time data, news sentiment, and advanced AI to give you a complete picture of the stocks you care about. Move beyond the noise and make data-driven decisions.</p>",
+        """
+                <div class="chart-container">
+                    <svg class="hero-chart-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
+                        <path class="hero-chart-path" d="M 0 120 C 50 120, 70 60, 100 80 C 130 100, 150 20, 200 50 C 250 80, 270 130, 320 100 C 370 70, 400 30, 450 50 C 480 70, 500 40, 500 40" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True
     )
-    
-    # Animated chart SVG
-    st.markdown("""
-    <div class="chart-container">
-        <svg class="hero-chart-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
-            <path class="hero-chart-path" d="M 0 120 C 50 120, 70 60, 100 80 C 130 100, 150 20, 200 50 C 250 80, 270 130, 320 100 C 370 70, 400 30, 450 50 C 480 70, 500 40, 500 40" />
-        </svg>
-    </div>
-    """, unsafe_allow_html=True)
 
-
-    # Center the button using a column layout
     col1, col2, col3 = st.columns([4, 2, 4])
     with col2:
         if st.button("Get Started For Free", use_container_width=True, type="primary"):
             st.switch_page("pages/Login.py")
     
-    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
 
     # --- Features Section ---

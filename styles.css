@@ -32,156 +32,67 @@ body {
     filter: blur(120px);
 }
 
-.shape1 {
-    width: 500px;
-    height: 500px;
-    background: rgba(0, 82, 212, 0.5);
-    top: -10%;
-    left: -10%;
-    animation: move 20s infinite alternate ease-in-out;
-}
-
-.shape2 {
-    width: 450px;
-    height: 450px;
-    background: rgba(138, 43, 226, 0.4);
-    bottom: -10%;
-    right: 5%;
-    animation: move 25s infinite alternate ease-in-out;
-}
-
-.shape3 {
-    width: 400px;
-    height: 400px;
-    background: rgba(54, 209, 220, 0.4);
-    top: 50%;
-    left: 20%;
-    animation: move 18s infinite alternate ease-in-out;
-}
+.shape1 { width: 500px; height: 500px; background: rgba(0, 82, 212, 0.5); top: -10%; left: -10%; animation: move 20s infinite alternate ease-in-out; }
+.shape2 { width: 450px; height: 450px; background: rgba(138, 43, 226, 0.4); bottom: -10%; right: 5%; animation: move 25s infinite alternate ease-in-out; }
+.shape3 { width: 400px; height: 400px; background: rgba(54, 209, 220, 0.4); top: 50%; left: 20%; animation: move 18s infinite alternate ease-in-out; }
 
 @keyframes move {
     from { transform: translate(0, 0) rotate(0deg) scale(1); }
     to { transform: translate(100px, 50px) rotate(45deg) scale(1.1); }
 }
 
-
 /* --- Hero Section --- */
-/* Layout properties have been removed from here */
-.hero-section {
-    text-align: center;
-    padding: 2rem;
-}
+.hero-section { text-align: center; padding: 2rem; }
+.hero-content-wrapper { width: 100%; }
+.hero-title { font-size: 3.8rem; font-weight: 700; line-height: 1.2; margin-bottom: 1.5rem; background: -webkit-linear-gradient(45deg, #FFFFFF, #92FE9D); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.1); }
+.hero-subtitle { font-size: 1.2rem; color: #B0B0B0 !important; max-width: 700px; margin: 0 auto 2rem auto; }
 
-.hero-title {
-    font-size: 3.8rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
-    background: -webkit-linear-gradient(45deg, #FFFFFF, #92FE9D);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.1);
-}
-
-.hero-subtitle {
-    font-size: 1.2rem;
-    color: #B0B0B0 !important;
-    max-width: 700px;
-    margin: auto;
-    margin-bottom: 2rem;
-}
-
-/* --- Animated Chart Styling --- */
-.chart-container {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto 2.5rem auto;
-    opacity: 0.6;
-}
-
-.hero-chart-svg {
-    width: 100%;
-    height: auto;
-}
-
-.hero-chart-path {
-    stroke: url(#chart-gradient);
-    stroke-width: 3;
-    stroke-linecap: round;
-    fill: none;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: draw-chart 3s ease-in-out forwards;
-}
-
-@keyframes draw-chart {
+/* --- Image Morph Transition --- */
+@keyframes morphIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+        filter: blur(5px);
+    }
     to {
-        stroke-dashoffset: 0;
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0px);
     }
 }
 
+.hero-image-container {
+    max-width: 700px;
+    margin: 0 auto;
+    /* Apply the animation */
+    animation: morphIn 1.5s 0.2s ease-out forwards;
+    opacity: 0; /* Start hidden */
+}
+
+.hero-image-container img {
+    border-radius: 16px; /* Rounded corners for the image */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4); /* Add a shadow */
+}
+
+/* --- Animated Chart Styling --- */
+.chart-container { width: 100%; max-width: 600px; margin: 2rem auto 2.5rem auto; opacity: 0.6; }
+.hero-chart-svg { width: 100%; height: auto; }
+.hero-chart-path { stroke: url(#chart-gradient); stroke-width: 3; stroke-linecap: round; fill: none; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw-chart 3s ease-in-out forwards; animation-delay: 0.5s; }
+
+@keyframes draw-chart { to { stroke-dashoffset: 0; } }
+
 /* --- Call to Action Button --- */
-.stButton > button {
-    font-weight: bold;
-    border-radius: 10px !important;
-    padding: 1rem 2rem !important;
-    font-size: 1.1rem !important;
-    border: none !important;
-    color: white !important;
-    background-image: linear-gradient(45deg, #ff4b2b, #ff416c);
-    transition: all 0.3s ease-in-out !important;
-    box-shadow: 0px 5px 20px rgba(255, 65, 108, 0.3);
-}
-
-.stButton > button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0px 8px 25px rgba(255, 65, 108, 0.5);
-    filter: brightness(1.1);
-}
-
+.stButton > button { font-weight: bold; border-radius: 10px !important; padding: 1rem 2rem !important; font-size: 1.1rem !important; border: none !important; color: white !important; background-image: linear-gradient(45deg, #ff4b2b, #ff416c); transition: all 0.3s ease-in-out !important; box-shadow: 0px 5px 20px rgba(255, 65, 108, 0.3); }
+.stButton > button:hover { transform: translateY(-3px); box-shadow: 0px 8px 25px rgba(255, 65, 108, 0.5); filter: brightness(1.1); }
 
 /* --- Features Section --- */
-.features-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 3rem;
-}
-
-.feature-card {
-    background: rgba(14, 17, 23, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid #222933;
-    border-radius: 16px;
-    padding: 2rem;
-    height: 250px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.feature-card:hover {
-    transform: translateY(-8px);
-    border-color: #ff416c;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-}
-
-.icon-container {
-    margin-bottom: 1rem;
-    height: 48px;
-}
-
-.icon-container svg {
-    filter: drop-shadow(0px 0px 5px rgba(54, 209, 220, 0.4));
-}
-
-.feature-card h3 {
-    font-size: 1.3rem;
-    color: #F0F0F0 !important;
-}
-
-.feature-card p {
-    color: #AAB2C0 !important;
-}
-
+.features-title { text-align: center; font-size: 2.5rem; margin-bottom: 3rem; }
+.feature-card { background: rgba(14, 17, 23, 0.7); backdrop-filter: blur(10px); border: 1px solid #222933; border-radius: 16px; padding: 2rem; height: 250px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+.feature-card:hover { transform: translateY(-8px); border-color: #ff416c; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+.icon-container { margin-bottom: 1rem; height: 48px; }
+.icon-container svg { filter: drop-shadow(0px 0px 5px rgba(54, 209, 220, 0.4)); }
+.feature-card h3 { font-size: 1.3rem; color: #F0F0F0 !important; }
+.feature-card p { color: #AAB2C0 !important; }
 
 /* --- General UI Elements --- */
 #MainMenu, footer { display: none; }
