@@ -3,3 +3,5 @@
 # Python 3.10 includes the 'distutils' module, which is required by some older dependencies like pandas-ta.
 # This should resolve the 'ModuleNotFoundError: No module named \'distutils.cmd\'' error.
 pythonVersion = "3.10" 
+[theme]
+base="dark"
