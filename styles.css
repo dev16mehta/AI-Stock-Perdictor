@@ -1,0 +1,144 @@
+/* --- NEW: Top Right Login Button --- */
+.top-right-nav {
+    position: fixed;
+    top: 1.5rem;
+    right: 2.5rem;
+    z-index: 100;
+}
+
+a.login-button {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+a.login-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- HIDE THE FULLSCREEN BUTTON ON THE IMAGE --- */
+[data-testid="stImageToolbar"] {
+    display: none !important;
+}
+
+/* --- General Body & Font Styling --- */
+body {
+    background-color: #04070B !important;
+    overflow-x: hidden;
+}
+
+/* --- Main Container Centering --- */
+section.main > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 95vh;
+}
+
+/* --- Animated Aurora Background --- */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+}
+.shape { position: absolute; border-radius: 50%; filter: blur(120px); }
+.shape1 { width: 500px; height: 500px; background: rgba(0, 82, 212, 0.5); top: -10%; left: -10%; animation: move 20s infinite alternate ease-in-out; }
+.shape2 { width: 450px; height: 450px; background: rgba(138, 43, 226, 0.4); bottom: -10%; right: 5%; animation: move 25s infinite alternate ease-in-out; }
+.shape3 { width: 400px; height: 400px; background: rgba(54, 209, 220, 0.4); top: 50%; left: 20%; animation: move 18s infinite alternate ease-in-out; }
+
+@keyframes move {
+    from { transform: translate(0, 0) rotate(0deg) scale(1); }
+    to { transform: translate(100px, 50px) rotate(45deg) scale(1.1); }
+}
+
+/* --- Hero Section Two-Column Layout --- */
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.hero-title {
+    font-size: 3.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    background: -webkit-linear-gradient(45deg, #FFFFFF, #92FE9D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.1);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: #B0B0B0 !important;
+    max-width: 600px; /* Limit width for readability */
+    margin-bottom: 2.5rem;
+}
+
+/* --- Image Showcase Container --- */
+.image-showcase-container {
+    background: rgba(14, 17, 23, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid #222933;
+    border-radius: 16px;
+    padding: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.image-showcase-container:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: #ff416c;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.image-showcase-container img {
+    border-radius: 10px; /* Rounded corners for the image itself */
+}
+
+/* --- Call to Action Button --- */
+.stButton > button {
+    font-weight: bold;
+    border-radius: 10px !important;
+    padding: 1rem 2.5rem !important; /* Larger padding */
+    font-size: 1.1rem !important;
+    border: none !important;
+    color: white !important;
+    background-image: linear-gradient(45deg, #ff4b2b, #ff416c);
+    transition: all 0.3s ease-in-out !important;
+    box-shadow: 0px 5px 20px rgba(255, 65, 108, 0.3);
+    width: auto !important; /* Ensure button width is based on content */
+    max-width: 300px;
+}
+
+.stButton > button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0px 8px 25px rgba(255, 65, 108, 0.5);
+    filter: brightness(1.1);
+}
+
+
+/* --- Features Section --- */
+.features-title { text-align: center; font-size: 2.5rem; margin-top: 5rem; margin-bottom: 3rem; }
+.feature-card { background: rgba(14, 17, 23, 0.7); backdrop-filter: blur(10px); border: 1px solid #222933; border-radius: 16px; padding: 2rem; height: 250px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+.feature-card:hover { transform: translateY(-8px); border-color: #ff416c; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+.icon-container { margin-bottom: 1rem; height: 48px; }
+.icon-container svg { filter: drop-shadow(0px 0px 5px rgba(54, 209, 220, 0.4)); }
+.feature-card h3 { font-size: 1.3rem; color: #F0F0F0 !important; }
+.feature-card p { color: #AAB2C0 !important; }
+
+/* --- General UI Elements --- */
+#MainMenu, footer { display: none; }
+.spacer { height: 5rem; }
