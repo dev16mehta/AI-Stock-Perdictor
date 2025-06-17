@@ -20,7 +20,6 @@ css = load_css("styles.css")
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
 # --- SVG Icons ---
-# A dictionary to hold our SVG icon data for easier management
 SVG_ICONS = {
     "analysis": """
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,9 +64,7 @@ SVG_ICONS = {
     """
 }
 
-# --- Landing Page Content ---
-
-# Add elements for the animated background
+# --- Background ---
 st.markdown(
     """
     <div class="background-animation">
@@ -79,67 +76,65 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# --- Two-Column Hero Layout ---
 with st.container():
-    st.markdown(
-        """
-        <div class="hero-section">
-            <div class="hero-content-wrapper">
+    col1, col2 = st.columns(spec=[1.2, 1], gap="large")
+
+    with col1:
+        st.markdown(
+            """
+            <div class="hero-text">
                 <h1 class='hero-title'>Navigate the Market with AI-Powered Clarity</h1>
                 <p class='hero-subtitle'>QuantView AI combines real-time data, news sentiment, and advanced AI to give you a complete picture of the stocks you care about. Move beyond the noise and make data-driven decisions.</p>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    # --- START: Image with Morph Transition Container ---
-    st.markdown('<div class="hero-image-container">', unsafe_allow_html=True)
-    st.image("assets/hero-image1.png", use_column_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    # --- END: Image with Morph Transition Container ---
-    
-    st.markdown(
-        """
-                <div class="chart-container">
-                    <svg class="hero-chart-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
-                        <path class="hero-chart-path" d="M 0 120 C 50 120, 70 60, 100 80 C 130 100, 150 20, 200 50 C 250 80, 270 130, 320 100 C 370 70, 400 30, 450 50 C 480 70, 500 40, 500 40" />
-                    </svg>
-                </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    col1, col2, col3 = st.columns([4, 2, 4])
-    with col2:
-        if st.button("Get Started For Free", use_container_width=True, type="primary"):
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("Get Started For Free", type="primary"):
             st.switch_page("pages/Login.py")
-    
-    st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
 
-    # --- Features Section ---
-    st.markdown("<h2 class='features-title'>Everything You Need to Invest with Confidence</h2>", unsafe_allow_html=True)
-    
-    def feature_card(icon, title, text):
-        return f"""
-        <div class="feature-card">
-            <div class="icon-container">{icon}</div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-        </div>
-        """
-        
-    c1, c2, c3 = st.columns(3)
-    
-    with c1:
-        st.markdown(feature_card(SVG_ICONS["analysis"], "Side-by-Side Analysis", "Compare performance, financials, and news sentiment for multiple stocks on one screen."), unsafe_allow_html=True)
-        st.markdown(feature_card(SVG_ICONS["screener"], "AI-Powered Stock Screener", "Use natural language to discover new investment opportunities based on your criteria."), unsafe_allow_html=True)
+    with col2:
+        st.markdown(
+            """
+            <div class="image-showcase-container">
+            """,
+            unsafe_allow_html=True
+        )
+        # --- FIXED LINE ---
+        st.image("assets/hero-image1.png", use_container_width=True) 
+        st.markdown(
+            """
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    with c2:
-        st.markdown(feature_card(SVG_ICONS["charting"], "Advanced Charting & Prediction", "Use technical indicators and AI-powered price forecasts to inform your strategy."), unsafe_allow_html=True)
-        st.markdown(feature_card(SVG_ICONS["portfolio"], "Portfolio & Watchlist", "Track your personal holdings with real-time profit/loss and monitor your favorite stocks."), unsafe_allow_html=True)
-    
-    with c3:
-        st.markdown(feature_card(SVG_ICONS["insights"], "AI-Generated Insights", "Get simple summaries or expert 'Bull vs. Bear' cases, tailored to your investing style."), unsafe_allow_html=True)
-        st.markdown(feature_card(SVG_ICONS["secure"], "Secure & Personalised", "Your data is your own. Secure login ensures your portfolio and watchlist remain private."), unsafe_allow_html=True)
-        
-    st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
+st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
+
+# --- Features Section ---
+st.markdown("<h2 class='features-title'>Everything You Need to Invest with Confidence</h2>", unsafe_allow_html=True)
+
+def feature_card(icon, title, text):
+    return f"""
+    <div class="feature-card">
+        <div class="icon-container">{icon}</div>
+        <h3>{title}</h3>
+        <p>{text}</p>
+    </div>
+    """
+
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    st.markdown(feature_card(SVG_ICONS["analysis"], "Side-by-Side Analysis", "Compare performance, financials, and news sentiment for multiple stocks on one screen."), unsafe_allow_html=True)
+    st.markdown(feature_card(SVG_ICONS["screener"], "AI-Powered Stock Screener", "Use natural language to discover new investment opportunities based on your criteria."), unsafe_allow_html=True)
+
+with c2:
+    st.markdown(feature_card(SVG_ICONS["charting"], "Advanced Charting & Prediction", "Use technical indicators and AI-powered price forecasts to inform your strategy."), unsafe_allow_html=True)
+    st.markdown(feature_card(SVG_ICONS["portfolio"], "Portfolio & Watchlist", "Track your personal holdings with real-time profit/loss and monitor your favorite stocks."), unsafe_allow_html=True)
+
+with c3:
+    st.markdown(feature_card(SVG_ICONS["insights"], "AI-Generated Insights", "Get simple summaries or expert 'Bull vs. Bear' cases, tailored to your investing style."), unsafe_allow_html=True)
+    st.markdown(feature_card(SVG_ICONS["secure"], "Secure & Personalised", "Your data is your own. Secure login ensures your portfolio and watchlist remain private."), unsafe_allow_html=True)
+
+st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
