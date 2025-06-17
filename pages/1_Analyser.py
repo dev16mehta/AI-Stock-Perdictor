@@ -5,8 +5,9 @@ from plotly.subplots import make_subplots
 from datetime import date, timedelta
 import sys
 import os
+import time # Import time for logout sequence
 
-# Authentication check and path setup
+# --- Authentication Guard & Path Setup ---
 if not st.session_state.get("logged_in", False):
     st.error("You need to log in to access this page.")
     st.stop()
@@ -19,8 +20,17 @@ from backend.predictor import get_price_prediction
 from backend.technical_analyzer import add_technical_indicators
 from backend.portfolio_manager import add_to_portfolio
 
-# Configure Streamlit page settings
+# --- Page Configuration ---
 st.set_page_config(page_title="QuantView AI Analyser", page_icon="📈", layout="wide")
+
+# --- NEW: Logout Function ---
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.email = ""
+    st.session_state.uid = ""
+    st.success("You have been successfully logged out!")
+    time.sleep(1.5)
+    st.switch_page("landing.py")
 
 def handle_add(uid, ticker):
     """Add a stock to the user's watchlist."""
@@ -64,7 +74,6 @@ def display_stock_details(container, ticker_data):
             c2.metric("Market Cap", f"${ticker_data['info'].info.get('marketCap', 0) / 1e9:,.2f}B")
         st.divider()
 
-        # Portfolio management form
         st.subheader("Add to Portfolio")
         with st.form(key=f"add_portfolio_{ticker_data['ticker']}"):
             shares = st.number_input("Number of Shares", min_value=0.0, format="%.4f")
@@ -98,7 +107,7 @@ def display_stock_details(container, ticker_data):
 st.markdown(f" # QuantView AI \n *Welcome, {st.session_state.get('email', 'Investor')}!*")
 st.divider()
 
-# Sidebar configuration
+# --- Sidebar configuration ---
 with st.sidebar:
     st.header("Stock Selection")
     tickers_input = st.text_input("Enter stock(s) (e.g., AAPL,MSFT)", "TSLA").upper()
@@ -106,7 +115,6 @@ with st.sidebar:
     st.header("AI Analysis Level")
     investor_level = st.selectbox("Choose your investor profile:", ("Beginner", "Advanced"))
 
-    # Advanced mode options
     selected_indicators = []
     if investor_level == "Advanced":
         st.header("Chart Options")
@@ -124,7 +132,12 @@ with st.sidebar:
     
     analyze_button = st.button("Analyse Stock(s)", type="primary")
 
-# Main content logic
+    # --- NEW: Logout Button ---
+    st.divider()
+    st.button("Logout", key="logout_analyser", on_click=logout, use_container_width=True)
+
+
+# --- Main content logic ---
 if analyze_button:
     if start_date >= end_date:
         st.warning("The start date must be before the end date.")
@@ -154,7 +167,7 @@ if analyze_button:
             
             st.session_state['analysis_data'] = all_data
 
-# Display analysis results
+# --- Display analysis results ---
 if st.session_state.get('analysis_data') and len(st.session_state['analysis_data']) > 0:
     all_data = st.session_state['analysis_data']
     
@@ -170,7 +183,6 @@ if st.session_state.get('analysis_data') and len(st.session_state['analysis_data
                 fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.6, 0.2, 0.2])
                 fig.add_trace(go.Candlestick(x=stock_df.index, open=stock_df['Open'], high=stock_df['High'],low=stock_df['Low'], close=stock_df['Close'], name='Price'), row=1, col=1)
 
-                # Plot selected technical indicators
                 if "SMA 20" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_20'], mode='lines', name='SMA 20', line=dict(width=1)), row=1, col=1)
                 if "SMA 50" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['SMA_50'], mode='lines', name='SMA 50', line=dict(width=1)), row=1, col=1)
                 if "EMA 20" in selected_indicators: fig.add_trace(go.Scatter(x=stock_df.index, y=stock_df['EMA_20'], mode='lines', name='EMA 20', line=dict(width=1, dash='dash')), row=1, col=1)

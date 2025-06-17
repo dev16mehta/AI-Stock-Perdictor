@@ -2,6 +2,7 @@ import streamlit as st
 import sys
 import os
 from datetime import date, timedelta
+import time # Import time for logout sequence
 
 # --- Authentication Guard & Path Setup ---
 if not st.session_state.get("logged_in", False):
@@ -13,6 +14,23 @@ from backend.data_handler import get_watchlist, get_stock_data, remove_from_watc
 
 # --- Page Configuration ---
 st.set_page_config(page_title="My Watchlist", page_icon="⭐", layout="wide")
+
+# --- NEW: Logout Function ---
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.email = ""
+    st.session_state.uid = ""
+    st.success("You have been successfully logged out!")
+    time.sleep(1.5)
+    st.switch_page("landing.py")
+
+# --- NEW: Sidebar with Logout Button ---
+with st.sidebar:
+    st.title("Account")
+    st.write(f"Logged in as: {st.session_state.get('email')}")
+    st.divider()
+    st.button("Logout", key="logout_watchlist", on_click=logout, use_container_width=True)
+
 
 st.markdown(f"""
     # ⭐ My Watchlist
@@ -32,7 +50,6 @@ def handle_remove(uid, ticker):
 
 # --- Data Loading ---
 uid = st.session_state.get('uid')
-# Use session state to store watchlist to prevent re-fetching on every interaction
 if 'watchlist' not in st.session_state:
     st.session_state.watchlist = get_watchlist(uid)
 

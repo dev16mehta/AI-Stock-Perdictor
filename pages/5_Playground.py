@@ -4,6 +4,7 @@ import os
 import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
+import time # Import time for logout sequence
 
 # --- Authentication Guard & Path Setup ---
 if not st.session_state.get("logged_in", False):
@@ -15,7 +16,23 @@ from backend.playground_handler import get_playground_portfolio, execute_trade, 
 from backend.portfolio_manager import get_live_prices
 
 # --- Page Configuration ---
-st.set_page_config(page_title="Stock Market Simulator", page_icon="🎮", layout="wide")
+st.set_page_config(page_title="Playground", page_icon="🎮", layout="wide")
+
+# --- NEW: Logout Function ---
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.email = ""
+    st.session_state.uid = ""
+    st.success("You have been successfully logged out!")
+    time.sleep(1.5)
+    st.switch_page("landing.py")
+
+# --- NEW: Sidebar with Logout Button ---
+with st.sidebar:
+    st.title("Account")
+    st.write(f"Logged in as: {st.session_state.get('email')}")
+    st.divider()
+    st.button("Logout", key="logout_playground", on_click=logout, use_container_width=True)
 
 # --- Custom CSS for Styling ---
 st.markdown("""
@@ -53,7 +70,7 @@ total_portfolio_value = playground_portfolio['cash'] + total_stock_value
 total_gain_loss = holdings_df['gain_loss'].sum() if not holdings_df.empty else 0
 
 # --- Page Title & Header ---
-st.markdown(" # Stock Market Simulator")
+st.markdown(" # 🎮 The Playground")
 st.caption("Learn to invest with a $100,000 virtual portfolio. No real money involved!")
 st.divider()
 
@@ -66,7 +83,7 @@ col3.metric("Total P/L", f"${total_gain_loss:,.2f}", delta_color=delta_color)
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --- Main Content (Trading Panel & Portfolio Info) ---
-main_col1, main_col2 = st.columns([1, 1.2], gap="large") # Adjusted column ratio
+main_col1, main_col2 = st.columns([1, 1.2], gap="large")
 
 # --- Trading Panel ---
 with main_col1:
@@ -117,7 +134,7 @@ with main_col1:
 with main_col2:
     tab1, tab2 = st.tabs(["Portfolio Composition", "AI Health Report"])
 
-    with tab1: # Portfolio Composition Chart
+    with tab1:
         with st.container(border=True, height=450):
             st.subheader("📊 Composition")
             labels = ['Cash', 'Stocks']
@@ -126,9 +143,9 @@ with main_col2:
             fig.update_layout(showlegend=True, margin=dict(l=0, r=0, t=40, b=0))
             st.plotly_chart(fig, use_container_width=True)
 
-    with tab2: # AI Health Report
+    with tab2:
         with st.container(border=True, height=450):
-            st.subheader("AI Health Report")
+            st.subheader("🤖 AI Health Report")
             if st.button("🔬 Analyze My Playground Health", use_container_width=True):
                 st.session_state['report_generated'] = True
             
