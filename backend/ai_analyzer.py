@@ -8,7 +8,12 @@ from langchain.chains import LLMChain
 def analyze_sentiment(articles):
     """
     Analyze sentiment of news articles using VADER sentiment analysis.
-    Returns a compound sentiment score between -1 (negative) and 1 (positive).
+    
+    Args:
+        articles (list): List of news article dictionaries containing title and description
+        
+    Returns:
+        float: Compound sentiment score between -1 (negative) and 1 (positive)
     """
     analyzer = SentimentIntensityAnalyzer()
     sentiment_scores = []
@@ -27,7 +32,14 @@ def analyze_sentiment(articles):
 def get_ai_summary(articles, ticker, investor_level="Beginner"):
     """
     Generate an AI-powered summary of news articles for a stock.
-    Adapts the analysis depth based on the investor's experience level.
+    
+    Args:
+        articles (list): List of news article dictionaries
+        ticker (str): Stock ticker symbol
+        investor_level (str): Experience level of the investor ("Beginner" or "Advanced")
+        
+    Returns:
+        str: AI-generated summary of the news articles
     """
     if not articles:
         return "No news available to generate a summary."
@@ -35,7 +47,7 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
     if not news_text:
         return "Not enough news content to generate a summary."
 
-    # Get API key from Streamlit secrets or environment variables
+    # Get API key from environment
     if 'GROQ_API_KEY' in st.secrets:
         api_key = st.secrets['GROQ_API_KEY']
     else:
@@ -64,7 +76,14 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
 def get_ai_comparison(data1, data2, investor_level="Beginner"):
     """
     Generate a comparative analysis of two stocks based on their news.
-    Adapts the analysis depth based on the investor's experience level.
+    
+    Args:
+        data1 (dict): First stock's data containing ticker and news
+        data2 (dict): Second stock's data containing ticker and news
+        investor_level (str): Experience level of the investor ("Beginner" or "Advanced")
+        
+    Returns:
+        str: AI-generated comparison of the two stocks
     """
     ticker1, news1 = data1['ticker'], data1['news']
     ticker2, news2 = data2['ticker'], data2['news']
@@ -74,7 +93,7 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
     if not news_text1 and not news_text2:
         return "Not enough news content for either stock to generate a comparison."
     
-    # Get API key from Streamlit secrets or environment variables
+    # Get API key from environment
     if 'GROQ_API_KEY' in st.secrets:
         api_key = st.secrets['GROQ_API_KEY']
     else:
@@ -100,16 +119,15 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
     except Exception as e:
         return f"Error generating AI comparison: {e}"
 
-# --- FUNCTION FOR PORTFOLIO HEALTH REPORT ---
 def get_ai_portfolio_analysis(report_data_string):
     """
     Generates an AI-powered analysis of a user's playground portfolio.
     
     Args:
-        report_data_string (str): A string containing all the calculated metrics for the portfolio.
+        report_data_string (str): String containing portfolio metrics and data
         
     Returns:
-        str: A markdown-formatted string with the AI's analysis and recommendations.
+        str: Markdown-formatted analysis with recommendations
     """
     if 'GROQ_API_KEY' in st.secrets:
         api_key = st.secrets['GROQ_API_KEY']

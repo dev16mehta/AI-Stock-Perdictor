@@ -11,6 +11,12 @@ db = firestore.client()
 def get_playground_portfolio(uid):
     """
     Retrieves or initializes a user's playground portfolio from Firestore.
+    
+    Args:
+        uid (str): User's unique identifier
+        
+    Returns:
+        dict: Portfolio data containing cash balance and holdings, or None if error
     """
     if not uid: return None
     try:
@@ -34,6 +40,16 @@ def get_playground_portfolio(uid):
 def execute_trade(uid, ticker, quantity, price, action):
     """
     Executes a buy or sell trade and updates the user's portfolio in Firestore.
+    
+    Args:
+        uid (str): User's unique identifier
+        ticker (str): Stock symbol
+        quantity (float): Number of shares to trade
+        price (float): Price per share
+        action (str): 'buy' or 'sell'
+        
+    Returns:
+        tuple: (success (bool), message (str))
     """
     if not all([uid, ticker, quantity > 0, price > 0, action in ['buy', 'sell']]):
         return False, "Invalid trade parameters."
@@ -86,11 +102,19 @@ def execute_trade(uid, ticker, quantity, price, action):
         print(f"Error executing trade for {uid}: {e}")
         return False, f"An unexpected error occurred: {e}"
 
-# --- NEW FUNCTION FOR HEALTH REPORT LOGIC ---
-@st.cache_data(ttl=600) # Cache report for 10 minutes to prevent re-running on every click
+@st.cache_data(ttl=600) # Cache report for 10 minutes
 def generate_health_report(_uid, portfolio, total_portfolio_value, total_stock_value):
     """
     Analyzes the user's portfolio and generates data for the AI report.
+    
+    Args:
+        _uid (str): User's unique identifier (unused, for cache invalidation)
+        portfolio (dict): User's portfolio data
+        total_portfolio_value (float): Total value of portfolio including cash
+        total_stock_value (float): Total value of stock holdings
+        
+    Returns:
+        tuple: (report_data (dict), message (str))
     """
     holdings = portfolio.get('holdings', [])
     if not holdings:
@@ -102,7 +126,7 @@ def generate_health_report(_uid, portfolio, total_portfolio_value, total_stock_v
     all_news = []
     sector_data = {}
     
-    # 1. Get Sector and News Data
+    # Get sector allocation and news data
     for ticker in tickers:
         try:
             info = yf.Ticker(ticker).info
@@ -110,7 +134,7 @@ def generate_health_report(_uid, portfolio, total_portfolio_value, total_stock_v
             if sector not in sector_data:
                 sector_data[sector] = 0
             
-            # Find the market value for this ticker
+            # Calculate market value for this ticker
             market_value = (df[df['ticker'] == ticker]['shares'].iloc[0] * info.get('regularMarketPrice', 0))
             sector_data[sector] += market_value
             
@@ -118,7 +142,7 @@ def generate_health_report(_uid, portfolio, total_portfolio_value, total_stock_v
         except Exception:
             continue
             
-    # 2. Calculate Metrics
+    # Calculate portfolio metrics
     # Diversification Score (Herfindahl-Hirschman Index inverse)
     sector_weights = {sector: value / total_stock_value for sector, value in sector_data.items()}
     hhi = sum(weight**2 for weight in sector_weights.values())
@@ -132,7 +156,7 @@ def generate_health_report(_uid, portfolio, total_portfolio_value, total_stock_v
     # Portfolio Sentiment
     portfolio_sentiment = analyze_sentiment(all_news)
 
-    # 3. Format data for the AI prompt
+    # Format data for AI analysis
     report_data = {
         "Total Portfolio Value": f"${total_portfolio_value:,.2f}",
         "Cash vs Stocks Ratio": f"{portfolio['cash']/total_portfolio_value:.1%} Cash vs. {total_stock_value/total_portfolio_value:.1%} Stocks",
@@ -144,10 +168,10 @@ def generate_health_report(_uid, portfolio, total_portfolio_value, total_stock_v
     
     report_data_string = "\n".join([f"- {key}: {value}" for key, value in report_data.items()])
     
-    # 4. Generate AI Analysis
+    # Generate AI analysis
     ai_analysis = get_ai_portfolio_analysis(report_data_string)
     
-    # 5. Return all data for display
+    # Prepare final report
     final_report = {
         "diversification_score": diversification_score,
         "portfolio_sentiment": portfolio_sentiment,

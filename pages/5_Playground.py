@@ -5,26 +5,27 @@ import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
 
-# --- Authentication Guard & Path Setup ---
+# Authentication check
 if not st.session_state.get("logged_in", False):
     st.error("You need to log in to access this page.")
     st.stop()
 
+# Add parent directory to path for backend imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from backend.playground_handler import get_playground_portfolio, execute_trade, generate_health_report
 from backend.portfolio_manager import get_live_prices
 
-# --- Page Configuration ---
+# Configure page layout
 st.set_page_config(page_title="Stock Simulator", page_icon="🎮", layout="wide")
 
-# --- Sidebar with Logout Button ---
+# User account sidebar
 with st.sidebar:
     st.title("Account")
     st.write(f"Logged in as: {st.session_state.get('email')}")
     st.divider()
     st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
 
-# --- Custom CSS for Styling ---
+# Custom styling for better UI
 st.markdown("""
 <style>
     .st-emotion-cache-1y4p8pa { padding-top: 2rem; }
@@ -36,8 +37,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
-# --- Data Loading & Initialization ---
+# Load user's portfolio data
 uid = st.session_state.get('uid')
 with st.spinner("Loading your Simulator..."):
     playground_portfolio = get_playground_portfolio(uid)
@@ -46,6 +46,7 @@ if playground_portfolio is None:
     st.error("Could not load your Stock Simulator. Please try again later.")
     st.stop()
 
+# Calculate portfolio metrics
 holdings_df = pd.DataFrame(playground_portfolio['holdings'])
 if not holdings_df.empty:
     live_prices = get_live_prices(holdings_df['ticker'].unique().tolist())
@@ -59,12 +60,12 @@ else:
 total_portfolio_value = playground_portfolio['cash'] + total_stock_value
 total_gain_loss = holdings_df['gain_loss'].sum() if not holdings_df.empty else 0
 
-# --- Page Title & Header ---
+# Display page header
 st.markdown(" # Stock Simulator")
 st.caption("Learn to invest with a $100,000 virtual portfolio. No real money involved!")
 st.divider()
 
-# --- Dashboard Metrics ---
+# Portfolio metrics dashboard
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Portfolio Value", f"${total_portfolio_value:,.2f}")
 col2.metric("Cash Balance", f"${playground_portfolio['cash']:,.2f}")
@@ -72,10 +73,10 @@ delta_color = "normal" if total_gain_loss >= 0 else "inverse"
 col3.metric("Total P/L", f"${total_gain_loss:,.2f}", delta_color=delta_color)
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- Main Content (Trading Panel & Portfolio Info) ---
+# Main content layout
 main_col1, main_col2 = st.columns([1, 1.2], gap="large")
 
-# --- Trading Panel ---
+# Trading interface
 with main_col1:
     with st.container(border=True):
         st.subheader("📈 Trade Stocks")
@@ -120,7 +121,7 @@ with main_col1:
                     else:
                         st.error(message)
 
-# --- Portfolio Info & Health Report ---
+# Portfolio analysis and health report
 with main_col2:
     tab1, tab2 = st.tabs(["Portfolio Composition", "AI Health Report"])
 
@@ -151,7 +152,7 @@ with main_col2:
                 else:
                     st.warning(message)
 
-# --- Holdings Display ---
+# Display current holdings
 st.markdown("<br>", unsafe_allow_html=True)
 with st.container(border=True):
     st.subheader("💼 Your Virtual Holdings")
