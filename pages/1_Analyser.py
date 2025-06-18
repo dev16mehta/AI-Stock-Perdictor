@@ -6,11 +6,12 @@ from datetime import date, timedelta
 import sys
 import os
 
-# --- Authentication Guard & Path Setup ---
+# Authentication check
 if not st.session_state.get("logged_in", False):
     st.error("You need to log in to access this page.")
     st.stop()
 
+# Add parent directory to path for backend imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from backend.data_handler import get_stock_data, get_financial_news, get_watchlist, add_to_watchlist, remove_from_watchlist
@@ -19,7 +20,7 @@ from backend.predictor import get_price_prediction
 from backend.technical_analyzer import add_technical_indicators
 from backend.portfolio_manager import add_to_portfolio
 
-# --- Page Configuration ---
+# Configure page layout
 st.set_page_config(page_title="QuantView AI Analyser", page_icon="📈", layout="wide")
 
 def handle_add(uid, ticker):
@@ -97,7 +98,7 @@ def display_stock_details(container, ticker_data):
 st.markdown(f" # QuantView AI \n *Welcome, {st.session_state.get('email', 'Investor')}!*")
 st.divider()
 
-# --- Sidebar configuration ---
+# Stock selection and analysis options
 with st.sidebar:
     st.header("Stock Selection")
     tickers_input = st.text_input("Enter stock(s) (e.g., AAPL,MSFT)", "TSLA").upper()
@@ -122,12 +123,10 @@ with st.sidebar:
     
     analyze_button = st.button("Analyse Stock(s)", type="primary")
 
-    # --- UPDATED LOGOUT ---
     st.divider()
     st.sidebar.page_link("pages/Logout.py", label="Logout", icon="🔒")
 
-
-# --- Main content logic ---
+# Process stock analysis request
 if analyze_button:
     if start_date >= end_date:
         st.warning("The start date must be before the end date.")
@@ -157,7 +156,7 @@ if analyze_button:
             
             st.session_state['analysis_data'] = all_data
 
-# --- Display analysis results ---
+# Display analysis results
 if st.session_state.get('analysis_data') and len(st.session_state['analysis_data']) > 0:
     all_data = st.session_state['analysis_data']
     
