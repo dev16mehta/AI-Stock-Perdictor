@@ -15,7 +15,7 @@ from backend.playground_handler import get_playground_portfolio, execute_trade, 
 from backend.portfolio_manager import get_live_prices
 
 # --- Page Configuration ---
-st.set_page_config(page_title="Playground", page_icon="🎮", layout="wide")
+st.set_page_config(page_title="Stock Simulator", page_icon="🎮", layout="wide")
 
 # --- Sidebar with Logout Button ---
 with st.sidebar:
@@ -39,11 +39,11 @@ st.markdown("""
 
 # --- Data Loading & Initialization ---
 uid = st.session_state.get('uid')
-with st.spinner("Loading your Playground..."):
+with st.spinner("Loading your Simulator..."):
     playground_portfolio = get_playground_portfolio(uid)
 
 if playground_portfolio is None:
-    st.error("Could not load your playground. Please try again later.")
+    st.error("Could not load your Stock Simulator. Please try again later.")
     st.stop()
 
 holdings_df = pd.DataFrame(playground_portfolio['holdings'])
@@ -60,7 +60,7 @@ total_portfolio_value = playground_portfolio['cash'] + total_stock_value
 total_gain_loss = holdings_df['gain_loss'].sum() if not holdings_df.empty else 0
 
 # --- Page Title & Header ---
-st.markdown(" # 🎮 The Playground")
+st.markdown(" # Stock Simulator")
 st.caption("Learn to invest with a $100,000 virtual portfolio. No real money involved!")
 st.divider()
 
@@ -136,7 +136,7 @@ with main_col2:
     with tab2:
         with st.container(border=True, height=450):
             st.subheader("🤖 AI Health Report")
-            if st.button("🔬 Analyze My Playground Health", use_container_width=True):
+            if st.button("🔬 Analyze My Stock's Health", use_container_width=True):
                 st.session_state['report_generated'] = True
             
             if st.session_state.get('report_generated', False):
