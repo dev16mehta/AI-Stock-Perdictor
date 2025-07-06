@@ -21,7 +21,7 @@
 
 - Interactive UI: A clean, user-friendly interface built with Streamlit that allows for dynamic ticker input and date range selection.
 
-## Tech Stack
+## Tech Stack used:
 - Frontend: Streamlit
 - Data Retrieval: yFinance, NewsAPI
 - Data Processing: Pandas, NumPy
@@ -60,13 +60,13 @@ python -m v'env .venv
 .\.venv\Scripts\activate
 ```
 
-3. Install Dependencies
+3. Install Dependencies:
 Install all the required Python libraries using the 'requirements.txt' file.
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set Up API Keys
+4. Set Up API Keys:
 This project requires API keys from NewsAPI and Groq.
 
 Create a file named '.env' in the root of your project directory.
