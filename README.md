@@ -45,7 +45,7 @@ git clone https://github.com/dev16mehta/AI-Stock-Perdictor.git
 cd AI-Stock-Perdictor
 ```
 
-2. Set Up a Virtual Environment
+2. Set Up a Virtual Environment:
 It's highly recommended to use a virtual environment to manage project dependencies.
 
 On macOS/Linux:
