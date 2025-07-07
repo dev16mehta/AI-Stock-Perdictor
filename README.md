@@ -1,4 +1,4 @@
-# QuantView AI
+# QuantViewAI
 
 - An interactive web application that combines real-time market data, financial news sentiment, and generative AI to deliver comprehensive stock insights. 
 - This tool is designed for both beginner and advanced investors, offering side-by-side stock comparisons and customisable analysis.
