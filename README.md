@@ -104,7 +104,7 @@ Barclays (London): BARC.L
 Volkswagen (Germany): VOW3.DE
 Reliance (India): RELIANCE.NS
 
-App Pages
+App Pages:
 - Analyser: The main analysis page. View advanced charts, AI insights, detailed financials, and price predictions. Add stocks to your watchlist or portfolio from here.
 
 - My Watchlist: A personalised dashboard to monitor stocks you are interested in.
