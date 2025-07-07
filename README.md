@@ -92,7 +92,7 @@ streamlit run QuantViewAI.py
 
 A new tab should automatically open in your web browser at http://localhost:8501.
 
-## How to Use
+## How to Use:
 - Enter Tickers: In the sidebar, enter one or two stock tickers, separated by a comma (e.g., NVDA, AMD).
 - Select Dates: Choose the start and end dates for the historical data analysis.
 - Choose Profile: Select your investor profile ("Beginner" or "Advanced") to tailor the AI-generated summaries to your needs.
