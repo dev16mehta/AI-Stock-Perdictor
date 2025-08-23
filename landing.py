@@ -130,6 +130,7 @@ st.markdown('</div>', unsafe_allow_html=True) # Close hero-wrapper
 st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
 
 # --- Features Section ---
+# Title of 
 st.markdown("<h2 class='features-title'>Everything You Need to Invest with Confidence</h2>", unsafe_allow_html=True)
 
 def feature_card(icon, title, text):
