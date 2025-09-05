@@ -15,7 +15,7 @@
 
 - Plain-English summaries for beginners.
 
-- Expert "Bull vs. Bear" cases for advanced users.
+- Expert "Bull vs. Bear" cases for advanced settings.
 
 - Direct comparative analysis when viewing two stocks.
 
