@@ -84,7 +84,7 @@ GROQ_API_KEY="YOUR_GROQ_API_KEY_HERE"
 
 Note: The .gitignore file is already configured to prevent this file from being committed to GitHub.
 
-## How to Run the App:
+## How to Run the Application:
 With your environment activated and API keys in place, start the Streamlit server with a single command:
 ```bash
 streamlit run QuantViewAI.py
