@@ -13,13 +13,13 @@
 
 - AI-Generated Insights: Leverages the Groq API with Llama 3 via LangChain to generate:
 
-- Plain-English summaries for beginners.
+  - Plain-English summaries for beginners.
 
-- Expert "Bull vs. Bear" cases for advanced settings.
+  - Expert "Bull vs. Bear" cases for advanced settings.
 
-- Direct comparative analysis when viewing two stocks.
+  - Direct comparative analysis when viewing two stocks.
 
-- Interactive UI: A clean, user-friendly interface built with Streamlit that allows for dynamic ticker input and date range selection.
+  - Interactive UI: A clean, user-friendly interface built with Streamlit that allows for dynamic ticker input and date range selection.
 
 ## Tech Stack used:
 - Frontend: Streamlit
