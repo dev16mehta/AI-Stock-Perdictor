@@ -15,7 +15,7 @@ def load_css(file_path):
     with open(file_path) as f:
         return f.read()
 
-# Inject custom CSS
+# Inject custom CSS styles
 css = load_css("styles.css")
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
