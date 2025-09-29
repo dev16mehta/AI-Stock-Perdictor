@@ -57,7 +57,7 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
         return "Error: GROQ_API_KEY not found. Please configure your secrets."
 
     # CORRECTED: Updated to the current model name
-    llm = ChatGroq(temperature=0, model_name="llama-3.1-70b-versatile", api_key=api_key)
+    llm = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile", api_key=api_key)
 
     # Customize prompt based on investor experience level
     if investor_level == "Beginner":
@@ -103,7 +103,8 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
     if not api_key:
         return "Error: GROQ_API_KEY not found. Please configure your secrets."
 
-    llm = ChatGroq(temperature=0.1, model_name="llama-3.1-70b-versatile", api_key=api_key)
+    # CORRECTED: Updated to the current model name
+    llm = ChatGroq(temperature=0.1, model_name="llama-3.3-70b-versatile", api_key=api_key)
 
     # Customize prompt based on investor experience level
     if investor_level == "Beginner":
@@ -139,7 +140,7 @@ def get_ai_portfolio_analysis(report_data_string):
         return "Error: GROQ_API_KEY not found."
 
     # CORRECTED: Updated to the current model name
-    llm = ChatGroq(temperature=0.2, model_name="llama-3.1-70b-versatile", api_key=api_key)
+    llm = ChatGroq(temperature=0.2, model_name="llama-3.3-70b-versatile", api_key=api_key)
 
     template = """
     You are an encouraging and insightful financial analyst reviewing a user's virtual stock portfolio.
