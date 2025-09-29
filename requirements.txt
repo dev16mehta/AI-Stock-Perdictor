@@ -1,4 +1,3 @@
-standard-distutils
 streamlit
 yfinance
 newsapi-python
@@ -12,6 +11,4 @@ scikit-learn
 plotly
 firebase-admin
 prophet
-pandas-ta==0.3.14b0
-setuptools
-finsymbols
+pandas-ta
