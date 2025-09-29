@@ -102,7 +102,7 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
     if not api_key:
         return "Error: GROQ_API_KEY not found. Please configure your secrets."
 
-    llm = ChatGroq(temperature=0.1, model_name="llama3-70b-8192", api_key=api_key)
+    llm = ChatGroq(temperature=0.1, model_name="llama-3.1-70b-versatile", api_key=api_key)
 
     # Customize prompt based on investor experience level
     if investor_level == "Beginner":
