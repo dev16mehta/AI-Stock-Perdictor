@@ -5,8 +5,8 @@ vaderSentiment
 langchain
 langchain-groq
 python-dotenv
-pandas==1.5.3
-numpy==1.26.4
+pandas
+numpy
 scikit-learn
 plotly
 firebase-admin
