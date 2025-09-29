@@ -8,10 +8,10 @@ from langchain.chains import LLMChain
 def analyze_sentiment(articles):
     """
     Analyze sentiment of news articles using VADER sentiment analysis.
-    
+
     Args:
         articles (list): List of news article dictionaries containing title and description
-        
+
     Returns:
         float: Compound sentiment score between -1 (negative) and 1 (positive)
     """
@@ -24,7 +24,7 @@ def analyze_sentiment(articles):
             text = article['title'] + ". " + article['description']
             score = analyzer.polarity_scores(text)
             sentiment_scores.append(score['compound'])
-    
+
     if not sentiment_scores:
         return 0.0
     return sum(sentiment_scores) / len(sentiment_scores)
@@ -32,12 +32,12 @@ def analyze_sentiment(articles):
 def get_ai_summary(articles, ticker, investor_level="Beginner"):
     """
     Generate an AI-powered summary of news articles for a stock.
-    
+
     Args:
         articles (list): List of news article dictionaries
         ticker (str): Stock ticker symbol
         investor_level (str): Experience level of the investor ("Beginner" or "Advanced")
-        
+
     Returns:
         str: AI-generated summary of the news articles
     """
@@ -56,7 +56,8 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
     if not api_key:
         return "Error: GROQ_API_KEY not found. Please configure your secrets."
 
-    llm = ChatGroq(temperature=0, model_name="llama3-70b", api_key=api_key)
+    # CORRECTED: Updated to the current model name
+    llm = ChatGroq(temperature=0, model_name="llama-3.1-70b-versatile", api_key=api_key)
 
     # Customize prompt based on investor experience level
     if investor_level == "Beginner":
@@ -76,12 +77,12 @@ def get_ai_summary(articles, ticker, investor_level="Beginner"):
 def get_ai_comparison(data1, data2, investor_level="Beginner"):
     """
     Generate a comparative analysis of two stocks based on their news.
-    
+
     Args:
         data1 (dict): First stock's data containing ticker and news
         data2 (dict): Second stock's data containing ticker and news
         investor_level (str): Experience level of the investor ("Beginner" or "Advanced")
-        
+
     Returns:
         str: AI-generated comparison of the two stocks
     """
@@ -92,7 +93,7 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
 
     if not news_text1 and not news_text2:
         return "Not enough news content for either stock to generate a comparison."
-    
+
     # Get API key from environment
     if 'GROQ_API_KEY' in st.secrets:
         api_key = st.secrets['GROQ_API_KEY']
@@ -122,10 +123,10 @@ def get_ai_comparison(data1, data2, investor_level="Beginner"):
 def get_ai_portfolio_analysis(report_data_string):
     """
     Generates an AI-powered analysis of a user's playground portfolio.
-    
+
     Args:
         report_data_string (str): String containing portfolio metrics and data
-        
+
     Returns:
         str: Markdown-formatted analysis with recommendations
     """
@@ -137,8 +138,9 @@ def get_ai_portfolio_analysis(report_data_string):
     if not api_key:
         return "Error: GROQ_API_KEY not found."
 
-    llm = ChatGroq(temperature=0.2, model_name="llama3-70b-8192", api_key=api_key)
-    
+    # CORRECTED: Updated to the current model name
+    llm = ChatGroq(temperature=0.2, model_name="llama-3.1-70b-versatile", api_key=api_key)
+
     template = """
     You are an encouraging and insightful financial analyst reviewing a user's virtual stock portfolio.
     Your tone should be positive and educational.
